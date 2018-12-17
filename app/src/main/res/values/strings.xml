@@ -1,0 +1,29 @@
+<resources>
+    <string name="app_name">Affiliate Buddy - Link Generator</string>
+    <string name="app_title">Affiliate Buddy</string>
+    <string name="txt_logoTitle">Affiliate Buddy</string>
+    <string name="txt_hintInputUrl">Enter Product URL</string>
+    <string name="txt_labelTag">Select Tag:</string>
+    <string name="txt_longLink">Long link</string>
+    <string name="txt_shortLink">Short link</string>
+    <string name="txt_generate_link">Generate</string>
+    <string-array name="array_aff_ids">
+        <item>digicular-21</item>
+        <item>anotheraffid-21</item>
+    </string-array>
+    <string name="txt_hintOutputUrl">Generated Affiliate URL</string>
+    <string name="txt_copy">Copy</string>
+    <string name="developer_credits">App by Susheel Karam</string>
+
+    <!-- Empty View in Link history -->
+    <string name="no_links">You haven\'t created any links yet!</string>
+
+    <!--Drawable Menu strings-->
+    <string name="home">Home</string>
+    <string name="links_history">Your Links</string>
+    <string name="howto">How to Use?</string>
+    <string name="settings">Settings</string>
+    <string name="about_dev">About Us</string>
+
+
+</resources>
