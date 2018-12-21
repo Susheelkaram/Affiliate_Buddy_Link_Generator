@@ -42,7 +42,6 @@ public class LinksCursorAdapter extends CursorAdapter{
         String title = cursor.getString(cursor.getColumnIndexOrThrow(linksContract.linksEntry.COLUMN_TITLE));
         final String url = cursor.getString(cursor.getColumnIndexOrThrow(linksContract.linksEntry.COLUMN_URL));
         int id = cursor.getInt(cursor.getColumnIndexOrThrow(linksContract.linksEntry.COLUMN_ID));
-
         final Uri currentEntryUri =  Uri.withAppendedPath(linksContract.linksEntry.CONTENT_URI, Integer.toString(id));
 
 

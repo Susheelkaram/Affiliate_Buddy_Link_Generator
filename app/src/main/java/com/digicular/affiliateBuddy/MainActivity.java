@@ -21,6 +21,8 @@ import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
@@ -31,6 +33,7 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.RadioGroup;
+import android.widget.SimpleCursorAdapter;
 import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -41,6 +44,7 @@ import org.jsoup.nodes.Element;
 
 import java.io.IOException;
 
+import com.digicular.affiliateBuddy.data.SiteDetector;
 import com.digicular.affiliateBuddy.data.linksDbHelper;
 import com.digicular.affiliateBuddy.data.linksContract.linksEntry;
 
@@ -48,14 +52,26 @@ import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
-
+/*
+* @author Susheel Karam
+* */
 
 public class MainActivity extends AppCompatActivity {
+
+    // Site Detector Constants
+    protected static final int AMAZON_IN = 100;
+    protected static final int AMAZON_COM = 101;
+    protected static final int FLIPKART = 200;
+    protected static final int GEARBEST = 300;
+
+    protected static int GeneratorMode = 100;
+
     private String txt_inputUrl;
     private String selectedAssociateId;
     private String txt_outputUrl;
     private String tagKeyword = "tag=";
 
+    private TextView textView_AppMode;
     private TextInputEditText inputUrl;
     private Spinner idSelector;
     private RadioGroup radioLongShort;
@@ -82,35 +98,25 @@ public class MainActivity extends AppCompatActivity {
         textView_productTitle = (TextView) findViewById(R.id.textView_productTitle);
 
         // Setting custom Toolbar or Action bar as default Actionbar
-        myToolbar = (Toolbar) findViewById(R.id.Toolbar_myToolbar);
-        setSupportActionBar(myToolbar);
-        ActionBar actionBar = getSupportActionBar();
-        actionBar.setHomeAsUpIndicator(R.drawable.ic_menu_black_24dp);
-        actionBar.setDisplayHomeAsUpEnabled(true);
-
+        setupActionBar();
 
         // Setting up Navigation Drawer
-        myDrawerLayout = (DrawerLayout) findViewById(R.id.myDrawerLayout);
-        myNavigationView = (NavigationView) findViewById(R.id.myNavigationView);
-        myNavigationView.setNavigationItemSelectedListener(new NavigationView.OnNavigationItemSelectedListener() {
+        setupNavDrawer();
+
+        // Detecting change in Input URL and  Selecting Mode based on it
+        inputUrl.addTextChangedListener(new TextWatcher() {
             @Override
-            public boolean onNavigationItemSelected(@NonNull MenuItem menuItem) {
-                switch (menuItem.getItemId()){
-                    case R.id.nav_home:
-                        Intent homeIntent =  new Intent(getApplicationContext(), MainActivity.class);
-                        homeIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-                        startActivity(homeIntent);
-                    case R.id.nav_myLinks:
-                        Intent historyIntent = new Intent(getApplicationContext(), DisplayLinksHistory.class);
-                        startActivity(historyIntent);
-                }
-                menuItem.setChecked(true);
-                myDrawerLayout.closeDrawers();
-                return true;
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) { }
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+                String newInputUrl = inputUrl.getText().toString();
+                setAppMode(newInputUrl);
             }
+
+            @Override
+            public void afterTextChanged(Editable s) { }
         });
-
-
 
         // Clipboard copy
         clipboardManager = (ClipboardManager) getSystemService(Context.CLIPBOARD_SERVICE);
@@ -136,6 +142,8 @@ public class MainActivity extends AppCompatActivity {
             }
         }
 
+
+        // Setting Affiliate ID from user dropdown selection
         idSelector.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
@@ -214,24 +222,17 @@ public class MainActivity extends AppCompatActivity {
         generateLink();
         addToDb(null);
     }
+
+
     public void generateLink(){
         txt_inputUrl = inputUrl.getText().toString();
-        if (isValidUrl(txt_inputUrl)){
-            if(txt_inputUrl.contains("?")){
-                txt_inputUrl = txt_inputUrl.split("\\?")[0];
-                txt_outputUrl = txt_inputUrl + "?" + tagKeyword + selectedAssociateId;
-                //txt_outputUrl = txt_inputUrl + "&" + tagKeyword + selectedAssociateId;
-            }
-            else if(txt_inputUrl.charAt(txt_inputUrl.length() - 1) != '/'){
-                txt_outputUrl = txt_inputUrl + "/?" + tagKeyword + selectedAssociateId;
-            }
-            else {
-                txt_outputUrl = txt_inputUrl + "?" + tagKeyword + selectedAssociateId;
-            }
+        if (GeneratorMode != -1){
+            LinkGenerator linkGenerator = new LinkGenerator();
+            txt_outputUrl = linkGenerator.generate(txt_inputUrl, GeneratorMode);
             generatedUrl.setText(txt_outputUrl);
         }
         else {
-            Toast.makeText(this, "Enter a Valid Amazon URL", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, "Cannot generate link. Please Check URL", Toast.LENGTH_SHORT).show();
         }
 
     }
@@ -241,14 +242,14 @@ public class MainActivity extends AppCompatActivity {
         Toast.makeText(this, "Link Copied to clipboard", Toast.LENGTH_SHORT).show();
     }
     protected boolean isValidUrl(String urlText){
-        if(urlText.isEmpty() || !urlText.startsWith("https://www.amazon.")){
+        if(urlText.isEmpty()){
             return false;
         }
         else return true;
     }
     protected void handleSendText(Intent intent){
         // Catching Shared text and splitting into URl and extra description (Product title)
-        String[] sharedText = intent.getStringExtra(Intent.EXTRA_TEXT).split("https://") ;
+        String[] sharedText = intent.getStringExtra(Intent.EXTRA_TEXT).split("(https:\\/\\/|http:\\/\\/)") ;
         String sharedDescription = sharedText[0];
         String sharedUrl = "https://" + sharedText[1];
 
@@ -299,11 +300,11 @@ public class MainActivity extends AppCompatActivity {
         }
 
         // If Product Title is Empty, fetch it and update it on Database
-        if(title.isEmpty() || title.equals("No Title")){
-            ScrapingTask getTitle = new ScrapingTask();
-            getTitle.execute(url, newEntryUri.toString());
-            //getContentResolver().update();
-        }
+//        if(title.isEmpty() || title.equals("No Title")){
+//            ScrapingTask getTitle = new ScrapingTask();
+//            getTitle.execute(url, newEntryUri.toString());
+//            //getContentResolver().update();
+//        }
 
     }
     public void viewLinkHistory(View view){
@@ -311,7 +312,55 @@ public class MainActivity extends AppCompatActivity {
         startActivity(intent);
     }
 
+    protected void setupActionBar(){
+        // Setting custom Toolbar or Action bar as default Actionbar
+        myToolbar = (Toolbar) findViewById(R.id.Toolbar_myToolbar);
+        setSupportActionBar(myToolbar);
+        ActionBar actionBar = getSupportActionBar();
+        actionBar.setHomeAsUpIndicator(R.drawable.ic_menu_black_24dp);
+        actionBar.setDisplayHomeAsUpEnabled(true);
+    }
+    protected void setupNavDrawer(){
+        // Setting up Navigation Drawer
+        myDrawerLayout = (DrawerLayout) findViewById(R.id.myDrawerLayout);
+        myNavigationView = (NavigationView) findViewById(R.id.myNavigationView);
+        myNavigationView.setNavigationItemSelectedListener(new NavigationView.OnNavigationItemSelectedListener() {
+            @Override
+            public boolean onNavigationItemSelected(@NonNull MenuItem menuItem) {
+                switch (menuItem.getItemId()){
+                    case R.id.nav_home:
+                        Intent homeIntent =  new Intent(getApplicationContext(), MainActivity.class);
+                        homeIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                        startActivity(homeIntent);
+                    case R.id.nav_myLinks:
+                        Intent historyIntent = new Intent(getApplicationContext(), DisplayLinksHistory.class);
+                        startActivity(historyIntent);
+                }
+                menuItem.setChecked(true);
+                myDrawerLayout.closeDrawers();
+                return true;
+            }
+        });
+    }
+    protected void setAppMode(String url){
+        if (url != null){
+            textView_AppMode = (TextView) findViewById(R.id.TextView_AppMode);
+            SiteDetector siteDetector = new SiteDetector();
+            GeneratorMode = siteDetector.detectSite(url);
+            textView_AppMode.setText(Integer.toString(GeneratorMode));
 
+            // TODO: Set Spinner data (AFF ids) to Spinner based on Mode
+            idSelector = (Spinner) findViewById(R.id.affId_selector);
+            Cursor affIds = getContentResolver().query(linksEntry.CONTENT_URI, null, null, null, null);
+            int[] adapterRowViews = new int[]{R.id.affId_selector};
+            SimpleCursorAdapter CA_affIds = new SimpleCursorAdapter(this, android.R.layout.simple_spinner_item, affIds, new String[] {linksEntry._ID}, adapterRowViews, 0 );
+            CA_affIds.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+            idSelector.setAdapter(CA_affIds);
+        }
+        else {
+            Toast.makeText(getApplicationContext(), "Please Enter a Valid URL", Toast.LENGTH_SHORT).show();
+        }
+    }
 
 //    private void displayDatabaseInfo() {
 ////        // To access our database, we instantiate our subclass of SQLiteOpenHelper

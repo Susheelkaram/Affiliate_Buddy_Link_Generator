@@ -16,7 +16,7 @@
     </style>
 
     <style name="AppTheme.AppBarOverlay" parent="ThemeOverlay.AppCompat.ActionBar">
-        <item name="android:fontFamily">@font/opensans_bold</item>
+        <item name="android:fontFamily">@font/opensans_semibold</item>
         <item name="android:iconTint">@color/colorWhite</item>
     </style>
 

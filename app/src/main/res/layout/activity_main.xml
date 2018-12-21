@@ -43,6 +43,12 @@
                 android:orientation="vertical"
                 android:padding="10dp">
 
+                <TextView
+                    android:id="@+id/TextView_AppMode"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="App Mode"/>
+
                 <android.support.design.widget.TextInputLayout
                     style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.Dense"
                     android:layout_width="match_parent"

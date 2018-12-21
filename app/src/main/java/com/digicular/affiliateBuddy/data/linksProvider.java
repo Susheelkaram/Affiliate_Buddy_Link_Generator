@@ -87,7 +87,8 @@ public class linksProvider extends ContentProvider{
         String title = contentValues.getAsString(linksEntry.COLUMN_TITLE);
         String link =  contentValues.getAsString(linksEntry.COLUMN_URL);
         if(link.isEmpty()){
-            throw new IllegalArgumentException("Url should not be empty");
+            Toast.makeText(getContext(), "Url should not be empty", Toast.LENGTH_SHORT).show();
+            Log.d(LOG_TAG,"Url should not be empty");
         }
         long id = database.insert(linksEntry.TABLE_NAME, null, contentValues);
         if(id == -1){
