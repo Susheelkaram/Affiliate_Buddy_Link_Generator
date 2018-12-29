@@ -2,7 +2,7 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.digicular.affiliateBuddy">
 
-    <uses-permission android:name="android.permission.INTERNET"/>
+    <uses-permission android:name="android.permission.INTERNET" />
 
     <application
         android:allowBackup="true"
@@ -11,11 +11,10 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-
         <activity
             android:name=".MainActivity"
-            android:theme="@style/AppTheme"
-            android:label="@string/app_title">
+            android:label="@string/app_title"
+            android:theme="@style/AppTheme">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
@@ -35,13 +34,15 @@
             android:authorities="com.digicular.affiliateBuddy"
             android:exported="false" />
 
-        <activity android:name=".DisplayLinksHistory"
+        <activity
+            android:name=".DisplayLinksHistory"
             android:parentActivityName=".MainActivity"
             android:theme="@style/AppTheme">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
-                android:value=".MainActivity"/>
+                android:value=".MainActivity" />
         </activity>
+        <activity android:name=".Affiliate_id_editor"></activity>
     </application>
 
 </manifest>

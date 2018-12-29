@@ -70,6 +70,7 @@ public class MainActivity extends AppCompatActivity {
     private String selectedAssociateId;
     private String txt_outputUrl;
     private String tagKeyword = "tag=";
+    private String selectedAffiliateId = "";
 
     private TextView textView_AppMode;
     private TextInputEditText inputUrl;
@@ -103,6 +104,18 @@ public class MainActivity extends AppCompatActivity {
         // Setting up Navigation Drawer
         setupNavDrawer();
 
+        // Getting Affiliate Id selection
+        idSelector.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                selectedAffiliateId = idSelector.getSelectedItem().toString();
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {
+
+            }
+        });
         // Detecting change in Input URL and  Selecting Mode based on it
         inputUrl.addTextChangedListener(new TextWatcher() {
             @Override
@@ -157,7 +170,6 @@ public class MainActivity extends AppCompatActivity {
         });
 
     }
-
     @Override
     public boolean onOptionsItemSelected(MenuItem item){
         switch (item.getItemId()){
@@ -226,9 +238,12 @@ public class MainActivity extends AppCompatActivity {
 
     public void generateLink(){
         txt_inputUrl = inputUrl.getText().toString();
+        idSelector = (Spinner) findViewById(R.id.affId_selector);
+        Cursor spinnerCursor = (Cursor) idSelector.getSelectedItem();
+        selectedAffiliateId = spinnerCursor.getString(spinnerCursor.getColumnIndex(linksEntry.AFFID_COLUMN_IDTAG)).toString();
         if (GeneratorMode != -1){
             LinkGenerator linkGenerator = new LinkGenerator();
-            txt_outputUrl = linkGenerator.generate(txt_inputUrl, GeneratorMode);
+            txt_outputUrl = linkGenerator.generate(txt_inputUrl, GeneratorMode, selectedAffiliateId);
             generatedUrl.setText(txt_outputUrl);
         }
         else {
@@ -259,8 +274,8 @@ public class MainActivity extends AppCompatActivity {
 //            getTitle.execute(sharedUrl);
 //            sharedDescription = textView_productTitle.getText().toString();
 //        }
-
         if (sharedText != null){
+            setAppMode(sharedUrl);
             textView_productTitle.setText("");
             inputUrl.setText("");
             textView_productTitle.setText(sharedDescription);
@@ -290,9 +305,9 @@ public class MainActivity extends AppCompatActivity {
         mValues.put(linksEntry.COLUMN_URL, url);
 
 //        long newLinkEntryId =  mDb.insert(linksEntry.TABLE_NAME, null, mValues);
-        Uri newEntryUri = getContentResolver().insert(linksEntry.CONTENT_URI, mValues);
+        Uri newLinkUri = getContentResolver().insert(linksEntry.CONTENT_URI, mValues);
 
-        if(newEntryUri == null){
+        if(newLinkUri == null){
             Toast.makeText(this, "Failed! Unable to Add link to database", Toast.LENGTH_SHORT).show();
         }
         else {
@@ -335,6 +350,9 @@ public class MainActivity extends AppCompatActivity {
                     case R.id.nav_myLinks:
                         Intent historyIntent = new Intent(getApplicationContext(), DisplayLinksHistory.class);
                         startActivity(historyIntent);
+                    case R.id.nav_settings:
+                        Intent setupIntent = new Intent(getApplicationContext(), Affiliate_id_editor.class);
+                        startActivity(setupIntent);
                 }
                 menuItem.setChecked(true);
                 myDrawerLayout.closeDrawers();
@@ -351,9 +369,9 @@ public class MainActivity extends AppCompatActivity {
 
             // TODO: Set Spinner data (AFF ids) to Spinner based on Mode
             idSelector = (Spinner) findViewById(R.id.affId_selector);
-            Cursor affIds = getContentResolver().query(linksEntry.CONTENT_URI, null, null, null, null);
-            int[] adapterRowViews = new int[]{R.id.affId_selector};
-            SimpleCursorAdapter CA_affIds = new SimpleCursorAdapter(this, android.R.layout.simple_spinner_item, affIds, new String[] {linksEntry._ID}, adapterRowViews, 0 );
+            Cursor affIds = getContentResolver().query(linksEntry.AFFID_CONTENT_URI, null, null, null, null);
+            int[] adapterRowViews = new int[]{android.R.id.text1};
+            SimpleCursorAdapter CA_affIds = new SimpleCursorAdapter(this, android.R.layout.simple_spinner_item, affIds, new String[] {linksEntry.AFFID_COLUMN_IDTAG}, adapterRowViews, 0 );
             CA_affIds.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
             idSelector.setAdapter(CA_affIds);
         }

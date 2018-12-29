@@ -11,7 +11,7 @@ public final class linksDbHelper extends SQLiteOpenHelper{
 
     public static final String LOG_TAG = linksDbHelper.class.getSimpleName();
 
-    public static final String DATABASE_NAME = "linksHistory" ;
+    public static final String DATABASE_NAME = "links" ;
     public static final int DATABASE_VERSION = 1 ;
 
 
@@ -21,14 +21,20 @@ public final class linksDbHelper extends SQLiteOpenHelper{
 
     @Override
     public void onCreate(SQLiteDatabase sqliteDb) {
-
+        // Creating Links table
         sqliteDb.execSQL(linksEntry.SQL_CREATE_URLS_TABLE);
-        
+
+        // Creating Affiliate Ids table
+        sqliteDb.execSQL(linksEntry.AFFID_SQL_CREATE_TABLE);
     }
 
     @Override
     public void onUpgrade(SQLiteDatabase sqLiteDatabase, int oldVersion, int newVersion) {
-            sqLiteDatabase.execSQL("DROP TABLE IF EXISTS " + linksEntry.TABLE_NAME);
-            onCreate(sqLiteDatabase);
+         // Deleting and Creating Links table if already exists
+         sqLiteDatabase.execSQL("DROP TABLE IF EXISTS " + linksEntry.TABLE_NAME);
+
+         // Deleting and Creating Affiliate Id's table if already exists
+         sqLiteDatabase.execSQL("DROP TABLE IF EXISTS " + linksEntry.AFFID_TABLE_NAME);
+         onCreate(sqLiteDatabase);
     }
 }

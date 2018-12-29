@@ -25,7 +25,6 @@ public class DisplayLinksHistory extends AppCompatActivity implements LoaderMana
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
         setContentView(R.layout.activity_display_links_history);
 
         ListView lvLinks = (ListView) findViewById(R.id.lv_linksHistory);

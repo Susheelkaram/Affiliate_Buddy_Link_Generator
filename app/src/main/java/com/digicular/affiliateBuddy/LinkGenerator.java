@@ -18,9 +18,9 @@ public class LinkGenerator {
 
     }
 
-    public String generate(String linkAddress, int generatorMode){
+    public String generate(String linkAddress, int generatorMode, String affiliateID){
         // Site specific string keywords
-        String selectedAssociateId = "digicular-21";
+        String selectedAssociateId = affiliateID;
         final String amazon_tagKeyword = "tag=";
         final String flipkart_tagKeyword = "affid=";
         final String gearbest_tagKeyword = "lkid=";
