@@ -23,7 +23,9 @@ public class AffIdCursorAdapter extends CursorAdapter{
 
     @Override
     public View newView(Context context, Cursor cursor, ViewGroup parent) {
-        return LayoutInflater.from(context).inflate(R.layout.item_affiliate_id, parent,false);
+        LayoutInflater layoutInflater = LayoutInflater.from(context);
+        View view = layoutInflater.inflate(R.layout.item_affiliate_id, parent,false);
+        return view;
     }
 
     @Override

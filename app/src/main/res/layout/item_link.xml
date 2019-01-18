@@ -18,7 +18,9 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
-            android:layout_margin="10dp">
+            android:layout_marginTop="10dp"
+            android:layout_marginLeft="10dp"
+            android:layout_marginRight="10dp">
 
             <TextView
                 android:id="@+id/textView_hTitle"
@@ -38,50 +40,57 @@
                 android:text="Url"
                 android:textAppearance="@style/Base.TextAppearance.AppCompat.Small"
                 android:layout_marginTop="5dp"
-                android:layout_marginBottom="5dp"
+                android:layout_marginBottom="15dp"
                 android:autoLink="web"
                 android:textColorLink="@color/colorGrey"
                 android:drawableEnd="@drawable/ic_open_in_new_black_24dp"
                 android:drawablePadding="5dp"
                 android:drawableTint="@color/colorDarkGrey"
                 android:layout_marginEnd="10dp"/>
+            <!--<View-->
+                <!--android:layout_width="match_parent"-->
+                <!--android:layout_height="1dp"-->
+                <!--android:background="@color/colorLightGrey"/>-->
 
-            <LinearLayout
+            <RelativeLayout
                 android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center_horizontal">
+                android:layout_height="wrap_content">
                 <android.support.design.button.MaterialButton
                     android:id="@+id/button_hCopy"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    style="@style/Widget.MaterialComponents.Button.OutlinedButton.Icon"
+                    style="@style/Widget.MaterialComponents.Button.TextButton.Icon"
                     app:icon="@drawable/ic_content_copy_black_24dp"
-                    android:layout_margin="5dp"
+                    android:layout_marginRight="5dp"
                     android:paddingStart="10dp"
                     android:paddingEnd="6dp"
-                    android:minWidth="10dp"/>
-                <android.support.design.button.MaterialButton
-                    android:id="@+id/button_hDelete"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    style="@style/Widget.MaterialComponents.Button.OutlinedButton.Icon"
-                    app:icon="@drawable/ic_delete_black_24dp"
-                    android:layout_margin="5dp"
-                    android:paddingStart="10dp"
-                    android:paddingEnd="6dp"
-                    android:minWidth="10dp" />
+                    android:minWidth="10dp"
+                    android:layout_alignParentLeft="true"/>
+
                 <android.support.design.button.MaterialButton
                     android:id="@+id/button_hShare"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    style="@style/Widget.MaterialComponents.Button.OutlinedButton.Icon"
+                    style="@style/Widget.MaterialComponents.Button.TextButton.Icon"
                     app:icon="@drawable/ic_share_black_24dp"
-                    android:layout_margin="5dp"
+                    android:layout_marginRight="5dp"
                     android:paddingStart="10dp"
                     android:paddingEnd="6dp"
-                    android:minWidth="10dp" />
+                    android:minWidth="10dp"
+                    android:layout_toRightOf="@id/button_hCopy"/>
 
-            </LinearLayout>
+                <android.support.design.button.MaterialButton
+                android:id="@+id/button_hDelete"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                style="@style/Widget.MaterialComponents.Button.TextButton.Icon"
+                app:icon="@drawable/ic_delete_black_24dp"
+                android:paddingStart="10dp"
+                android:paddingEnd="6dp"
+                android:minWidth="10dp"
+                android:layout_alignParentRight="true"/>
+
+            </RelativeLayout>
         </LinearLayout>
 
 

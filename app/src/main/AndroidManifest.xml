@@ -42,7 +42,9 @@
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value=".MainActivity" />
         </activity>
-        <activity android:name=".Affiliate_id_editor"></activity>
+        <activity android:name=".Affiliate_id_editor" />
+        <activity android:name=".SettingsActivity" />
+        <activity android:name=".BitlyShorten"></activity>
     </application>
 
 </manifest>

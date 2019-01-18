@@ -180,18 +180,22 @@ public class linksProvider extends ContentProvider{
         switch(matchCode){
             case LINKS:
                 rowsUpdated = updateLink(uri, contentValues, selection, selectionArgs);
+                break;
             case LINK_ID:
                 selection = linksEntry.COLUMN_ID + "=?";
                 selectionArgs = new String[] {String.valueOf(ContentUris.parseId(uri))};
                 rowsUpdated = updateLink(uri, contentValues, selection, selectionArgs);
+                break;
 
             // Add cases for Affiliate Ids table
             case AFFIDS:
                 rowsUpdated = updateAffId(uri, contentValues, selection, selectionArgs);
+                break;
             case AFFID_ID:
                 selection = linksEntry.AFFID_COLUMN_ID + "=?";
                 selectionArgs = new String[] {String.valueOf(ContentUris.parseId(uri))};
                 rowsUpdated = updateAffId(uri, contentValues, selection, selectionArgs);
+                break;
             default:
                 Log.e(LOG_TAG, "Update not supported for " + uri);
         }
@@ -219,12 +223,13 @@ public class linksProvider extends ContentProvider{
          SQLiteDatabase database = mDbHelper.getWritableDatabase();
          String affiliate_id = contentValues.getAsString(linksEntry.AFFID_COLUMN_IDTAG);
          String program_name = contentValues.getAsString(linksEntry.AFFID_COLUMN_PROGRAM_NAME);
-//         if(affiliate_id.isEmpty() || program_name.isEmpty()){
-//             Toast.makeText(getContext(), "Enter a valid Affiliate/Link ID", Toast.LENGTH_SHORT).show();
-//             return 0;
-//         }
+         if(affiliate_id.isEmpty() || program_name.isEmpty()){
+             Toast.makeText(getContext(), "Enter a valid Affiliate/Link ID", Toast.LENGTH_SHORT).show();
+             return 0;
+         }
          return database.update(linksEntry.AFFID_TABLE_NAME, contentValues, selection, selectionArgs);
      }
+
     /**
      * Delete the data at the given selection and selection arguments.
      */

@@ -13,7 +13,7 @@
     </string-array>
     <string name="txt_hintOutputUrl">Generated Affiliate URL</string>
     <string name="txt_copy">Copy</string>
-    <string name="developer_credits">App by Susheel Karam</string>
+    <string name="developer_credits"><a href="https://www.linkedin.com/in/susheelkaram/">App by Susheel Karam</a></string>
 
     <!-- Empty View in Link history -->
     <string name="no_links">You haven\'t created any links yet!</string>
@@ -25,5 +25,21 @@
     <string name="settings">Settings</string>
     <string name="about_dev">About Us</string>
 
-
+    <!--Settings Activity-->
+    <string name="txt_HeadingAffiliateIDSetup">Setup Affiliate ID/TAGs</string>
+    <string name="txt_HeadingNewAffId">Add New ID</string>
+    <string name="txt_HeadingExistingIds">Existing Affiliate IDs</string>
+    <string name="txt_HintNewAffId">Enter New ID....</string>
+    <string-array name="sa_settingsAffid">
+        <item>Amazon</item>
+        <item>Flipkart</item>
+        <item>GearBest</item>
+    </string-array>
+    <!--Delete Dialog Settings-->
+    <string name="txt_deleteDialogPositive">Yes</string>
+    <string name="txt_deleteDialogNegative">Cancel</string>
+    <string name="txt_deleteDialogTitle">Delete</string>
+    <string name="txt_deleteDialogMessage">Are you sure you want to delete the Affiliate ID?</string>
+    <!--Toasts/ Log Messages/ Misc. Text-->
+    <string name="txt_shareIntent">Share your Generated link using: </string>
 </resources>

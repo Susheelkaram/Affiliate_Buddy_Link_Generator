@@ -1,5 +1,6 @@
 package com.digicular.affiliateBuddy;
 
+import com.digicular.affiliateBuddy.data.AppContract;
 import android.content.Context;
 import android.util.Log;
 import android.widget.Toast;
@@ -8,15 +9,15 @@ import com.digicular.affiliateBuddy.data.SiteDetector;
 
 public class LinkGenerator {
 
-    protected static final int AMAZON_IN = 100;
-    protected static final int AMAZON_COM = 101;
-    protected static final int FLIPKART = 200;
-    protected static final int GEARBEST = 300;
-    protected static final String LOG_TAG = "Link Generator";
-    String generatedLink = "";
-    LinkGenerator(){
+    protected static final int AMAZON = AppContract.AMAZON_TYPE_CODE;
+//    protected static final int AMAZON_COM = AppContract.AMAZONCOM_TYPE_CODE;
+    protected static final int FLIPKART = AppContract.FLIPKART_TYPE_CODE;
+    protected static final int GEARBEST = AppContract.GEARBEST_TYPE_CODE;
 
-    }
+    protected static final String LOG_TAG = "Link Generator";
+
+    String generatedLink = "";
+    LinkGenerator(){ }
 
     public String generate(String linkAddress, int generatorMode, String affiliateID){
         // Site specific string keywords
@@ -28,8 +29,8 @@ public class LinkGenerator {
         switch (generatorMode){
 
             // Amazon.in and Amazon.com Link generator
-            case AMAZON_IN:
-            case AMAZON_COM:
+
+            case AMAZON:
                 if (linkAddress.contains("?")) {
                     linkAddress = linkAddress.split("\\?")[0];
                     generatedLink = linkAddress + "?" + amazon_tagKeyword + selectedAssociateId;

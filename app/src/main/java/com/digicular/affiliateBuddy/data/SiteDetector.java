@@ -4,18 +4,18 @@ import java.util.HashMap;
 import java.util.regex.Pattern;
 
 public class SiteDetector {
-    HashMap<Pattern, Integer> sitesMap = new HashMap<>();
-    protected static final int AMAZON_IN = 100;
-    protected static final int AMAZON_COM = 101;
-    protected static final int FLIPKART = 200;
-    protected static final int GEARBEST = 300;
+    protected HashMap<Pattern, Integer> sitesMap = new HashMap<>();
+//    protected static final int AMAZON_IN = 100;
+//    protected static final int AMAZON_COM = 101;
+//    protected static final int FLIPKART = 200;
+//    protected static final int GEARBEST = 300;
 
     public SiteDetector() {
-        sitesMap.put(Pattern.compile("^(https:\\/\\/|http:\\/\\/)?(www[.])?([aA]mazon[.]in)(\\/).{0,}?$"), AMAZON_IN);
-        sitesMap.put(Pattern.compile("^(https:\\/\\/|http:\\/\\/)?(www[.])?([aA]mazon[.]com)(\\/).{0,}?$"), AMAZON_COM);
-        sitesMap.put(Pattern.compile("^(https:\\/\\/|http:\\/\\/)?(www[.]|dl[.])?([fF]lipkart[.]com)(\\/).{0,}?$"), FLIPKART);
-        sitesMap.put(Pattern.compile("^(https:\\/\\/|http:\\/\\/)?(www[.]|m[.])?([gG]earbest[.]com)(\\/).{0,}?$"), GEARBEST);
-        sitesMap.put(Pattern.compile("^(https:\\/\\/|http:\\/\\/)?([gG]earbest[.])?(app[.]link)(\\/).{0,}?$"), GEARBEST);
+        sitesMap.put(Pattern.compile("^(https:\\/\\/|http:\\/\\/)?(www[.])?([aA]mazon[.]in)(\\/).{0,}?$"), AppContract.AMAZON_TYPE_CODE);
+        sitesMap.put(Pattern.compile("^(https:\\/\\/|http:\\/\\/)?(www[.])?([aA]mazon[.]com)(\\/).{0,}?$"), AppContract.AMAZON_TYPE_CODE);
+        sitesMap.put(Pattern.compile("^(https:\\/\\/|http:\\/\\/)?(www[.]|dl[.])?([fF]lipkart[.]com)(\\/).{0,}?$"), AppContract.FLIPKART_TYPE_CODE);
+        sitesMap.put(Pattern.compile("^(https:\\/\\/|http:\\/\\/)?(www[.]|m[.])?([gG]earbest[.]com)(\\/).{0,}?$"), AppContract.GEARBEST_TYPE_CODE);
+        sitesMap.put(Pattern.compile("^(https:\\/\\/|http:\\/\\/)?([gG]earbest[.])?(app[.]link)(\\/).{0,}?$"), AppContract.GEARBEST_TYPE_CODE);
     }
 
     /*

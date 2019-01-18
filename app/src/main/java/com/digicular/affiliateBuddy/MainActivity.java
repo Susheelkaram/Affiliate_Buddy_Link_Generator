@@ -15,6 +15,7 @@ import android.support.annotation.NonNull;
 import android.support.design.button.MaterialButton;
 import android.support.design.widget.NavigationView;
 import android.support.design.widget.TextInputEditText;
+import android.support.v4.app.FragmentActivity;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBar;
@@ -44,6 +45,7 @@ import org.jsoup.nodes.Element;
 
 import java.io.IOException;
 
+import com.digicular.affiliateBuddy.data.AppContract;
 import com.digicular.affiliateBuddy.data.SiteDetector;
 import com.digicular.affiliateBuddy.data.linksDbHelper;
 import com.digicular.affiliateBuddy.data.linksContract.linksEntry;
@@ -52,11 +54,12 @@ import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.regex.Pattern;
 /*
 * @author Susheel Karam
 * */
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends BaseAppCompatActivity{
 
     // Site Detector Constants
     protected static final int AMAZON_IN = 100;
@@ -64,7 +67,7 @@ public class MainActivity extends AppCompatActivity {
     protected static final int FLIPKART = 200;
     protected static final int GEARBEST = 300;
 
-    protected static int GeneratorMode = 100;
+    protected static int GeneratorMode;
 
     private String txt_inputUrl;
     private String selectedAssociateId;
@@ -73,12 +76,13 @@ public class MainActivity extends AppCompatActivity {
     private String selectedAffiliateId = "";
 
     private TextView textView_AppMode;
-    private TextInputEditText inputUrl;
+    private EditText inputUrl;
     private Spinner idSelector;
     private RadioGroup radioLongShort;
     private MaterialButton buttonGenerate;
-    private TextInputEditText generatedUrl;
+    private EditText generatedUrl;
     private static TextView textView_productTitle;
+    private Button button_share;
 
     private Toolbar myToolbar;
     private DrawerLayout myDrawerLayout;
@@ -92,11 +96,12 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
 
 
-        inputUrl = (TextInputEditText) findViewById(R.id.txtInput_url);
+        inputUrl = (EditText) findViewById(R.id.txtInput_url);
         idSelector = (Spinner) findViewById(R.id.affId_selector);
         buttonGenerate = (MaterialButton) findViewById(R.id.button_generate);
-        generatedUrl = (TextInputEditText) findViewById(R.id.txtInput_generatedUrl);
+        generatedUrl = (EditText) findViewById(R.id.txtInput_generatedUrl);
         textView_productTitle = (TextView) findViewById(R.id.textView_productTitle);
+        button_share = (Button) findViewById(R.id.button_share);
 
         // Setting custom Toolbar or Action bar as default Actionbar
         setupActionBar();
@@ -131,6 +136,7 @@ public class MainActivity extends AppCompatActivity {
             public void afterTextChanged(Editable s) { }
         });
 
+
         // Clipboard copy
         clipboardManager = (ClipboardManager) getSystemService(Context.CLIPBOARD_SERVICE);
 
@@ -155,6 +161,14 @@ public class MainActivity extends AppCompatActivity {
             }
         }
 
+        // Share Out option
+        button_share.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                String shareText = generatedUrl.getText().toString();
+                shareNowMain(MainActivity.this, shareText);
+            }
+        });
 
         // Setting Affiliate ID from user dropdown selection
         idSelector.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
@@ -182,7 +196,10 @@ public class MainActivity extends AppCompatActivity {
 
     public class ScrapingTask extends AsyncTask<String, Void, String> {
         // Parameters
-        String url = "";
+        String entryUriString = "";
+        String linkUrl = "";
+        String htmlSelector;
+        int siteCode;
         @Override
         protected void onPreExecute() {
             super.onPreExecute();
@@ -192,12 +209,32 @@ public class MainActivity extends AppCompatActivity {
         @Override
         protected String doInBackground(String... strings) {
             String title = "";
-            url = strings[1];
+            linkUrl = strings[0];
+            entryUriString = strings[1];
+            siteCode = Integer.valueOf(strings[2]);
             Document doc;
+
+            // Choosing the HTML DOM selector based on Website
+            switch (siteCode){
+                case AppContract.AMAZON_TYPE_CODE:
+                    htmlSelector = "span#productTitle";
+                    break;
+                case AppContract.FLIPKART_TYPE_CODE:
+                    htmlSelector = "span._35KyD6";
+                    break;
+                case AppContract.GEARBEST_TYPE_CODE:
+                    htmlSelector = "h1.goodsIntro_title";
+                    break;
+            }
             try {
-                doc = Jsoup.connect(strings[0]).userAgent("Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/48.0.2564.116 Safari/537.36").get();
-                Element productTitle = doc.select("span#productTitle").first();
-                title = productTitle.text();
+                doc = Jsoup.connect(linkUrl).userAgent("Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/48.0.2564.116 Safari/537.36").get();
+                Element productTitle = doc.select(htmlSelector).first();
+                if(productTitle != null) {
+                    title = productTitle.text();
+                }
+                else {
+                    title = doc.title();
+                }
             }
             catch (IOException IOe){
                 IOe.printStackTrace();
@@ -209,11 +246,15 @@ public class MainActivity extends AppCompatActivity {
         @Override
         protected void onPostExecute(String s) {
             super.onPostExecute(s);
+            if(s == null){
+                s = "New Title";
+            }
+            Toast.makeText(MainActivity.this, "title is -" + s + "-", Toast.LENGTH_SHORT).show();
             ContentValues updateTitleValues = new ContentValues();
             updateTitleValues.put(linksEntry.COLUMN_TITLE, s);
-            Uri linkUri = Uri.parse(url);
-            int updatedNo = getContentResolver().update(linkUri, updateTitleValues, null, null);
-            Toast.makeText(MainActivity.this, "No. of cells updated for Uri " + linkUri + " is " + Integer.toString(updatedNo),Toast.LENGTH_SHORT).show();
+            Uri entryUri = Uri.parse(entryUriString);
+            int updatedNo = getContentResolver().update(entryUri, updateTitleValues, null, null);
+            Toast.makeText(MainActivity.this, "No. of cells updated for Uri " + entryUri + " is " + Integer.toString(updatedNo),Toast.LENGTH_SHORT).show();
             textView_productTitle.setText(s);
         }
 
@@ -294,6 +335,7 @@ public class MainActivity extends AppCompatActivity {
 
         ContentValues mValues = new ContentValues();
         mValues.put(linksEntry.COLUMN_DATETIME, timeNow);
+        mValues.put(linksEntry.COLUMN_URL, url);
 
         if(title.isEmpty()){
             title = "No Title";
@@ -301,8 +343,6 @@ public class MainActivity extends AppCompatActivity {
         // Handling Empty title i.e., Avoiding null value in Title
         mValues.put(linksEntry.COLUMN_TITLE, title);
 
-
-        mValues.put(linksEntry.COLUMN_URL, url);
 
 //        long newLinkEntryId =  mDb.insert(linksEntry.TABLE_NAME, null, mValues);
         Uri newLinkUri = getContentResolver().insert(linksEntry.CONTENT_URI, mValues);
@@ -315,11 +355,14 @@ public class MainActivity extends AppCompatActivity {
         }
 
         // If Product Title is Empty, fetch it and update it on Database
-//        if(title.isEmpty() || title.equals("No Title")){
-//            ScrapingTask getTitle = new ScrapingTask();
-//            getTitle.execute(url, newEntryUri.toString());
-//            //getContentResolver().update();
-//        }
+        if(title.isEmpty() || title.equals("No Title")){
+            ScrapingTask getTitle = new ScrapingTask();
+            getTitle.execute(url, newLinkUri.toString(), Integer.toString(GeneratorMode));
+//            ContentValues updateTitleValues = new ContentValues();
+//            updateTitleValues.put(linksEntry.COLUMN_TITLE, "New title");
+//            int updatedNo = getContentResolver().update(newLinkUri, updateTitleValues, null, null);
+            //getContentResolver().update();
+        }
 
     }
     public void viewLinkHistory(View view){
@@ -329,11 +372,7 @@ public class MainActivity extends AppCompatActivity {
 
     protected void setupActionBar(){
         // Setting custom Toolbar or Action bar as default Actionbar
-        myToolbar = (Toolbar) findViewById(R.id.Toolbar_myToolbar);
-        setSupportActionBar(myToolbar);
-        ActionBar actionBar = getSupportActionBar();
-        actionBar.setHomeAsUpIndicator(R.drawable.ic_menu_black_24dp);
-        actionBar.setDisplayHomeAsUpEnabled(true);
+        getSupportActionBar().setHomeAsUpIndicator(R.drawable.ic_menu_black_24dp);
     }
     protected void setupNavDrawer(){
         // Setting up Navigation Drawer
@@ -347,12 +386,19 @@ public class MainActivity extends AppCompatActivity {
                         Intent homeIntent =  new Intent(getApplicationContext(), MainActivity.class);
                         homeIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
                         startActivity(homeIntent);
+                        break;
                     case R.id.nav_myLinks:
                         Intent historyIntent = new Intent(getApplicationContext(), DisplayLinksHistory.class);
                         startActivity(historyIntent);
+                        break;
                     case R.id.nav_settings:
-                        Intent setupIntent = new Intent(getApplicationContext(), Affiliate_id_editor.class);
+                        Intent setupIntent = new Intent(getApplicationContext(), SettingsActivity.class);
                         startActivity(setupIntent);
+                        break;
+                    case R.id.nav_about:
+                        Intent bitlyIntent = new Intent(getApplicationContext(), BitlyShorten.class);
+                        startActivity(bitlyIntent);
+                        break;
                 }
                 menuItem.setChecked(true);
                 myDrawerLayout.closeDrawers();
@@ -367,9 +413,12 @@ public class MainActivity extends AppCompatActivity {
             GeneratorMode = siteDetector.detectSite(url);
             textView_AppMode.setText(Integer.toString(GeneratorMode));
 
-            // TODO: Set Spinner data (AFF ids) to Spinner based on Mode
+            // Set Spinner data (AFF ids) to Spinner based on Mode
             idSelector = (Spinner) findViewById(R.id.affId_selector);
-            Cursor affIds = getContentResolver().query(linksEntry.AFFID_CONTENT_URI, null, null, null, null);
+            AppContract appContract = new AppContract();
+            String selection = linksEntry.AFFID_COLUMN_PROGRAM_NAME + "=?";
+            String[] selectionArgs = new String[] {String.valueOf(appContract.getTypeString(GeneratorMode))};
+            Cursor affIds = getContentResolver().query(linksEntry.AFFID_CONTENT_URI, null, selection, selectionArgs, null);
             int[] adapterRowViews = new int[]{android.R.id.text1};
             SimpleCursorAdapter CA_affIds = new SimpleCursorAdapter(this, android.R.layout.simple_spinner_item, affIds, new String[] {linksEntry.AFFID_COLUMN_IDTAG}, adapterRowViews, 0 );
             CA_affIds.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
@@ -377,6 +426,18 @@ public class MainActivity extends AppCompatActivity {
         }
         else {
             Toast.makeText(getApplicationContext(), "Please Enter a Valid URL", Toast.LENGTH_SHORT).show();
+        }
+    }
+    public void shareNowMain(Context context, String shareText){
+        if(!shareText.isEmpty()){
+            Intent shareIntent = new Intent(Intent.ACTION_SEND);
+            shareIntent.putExtra(Intent.EXTRA_TEXT, shareText);
+            shareIntent.setType("text/plain");
+            context.startActivity(Intent.createChooser(shareIntent, "Share your Generated link using: "));
+        }
+        else {
+            Toast.makeText(this, "Please, generate the link first.", Toast.LENGTH_SHORT).show();
+            return;
         }
     }
 

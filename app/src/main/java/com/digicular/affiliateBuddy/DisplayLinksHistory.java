@@ -7,8 +7,10 @@ import android.support.v4.app.LoaderManager;
 import android.support.v4.content.CursorLoader;
 import android.support.v4.content.Loader;
 import android.support.v4.widget.CursorAdapter;
+import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.widget.Toolbar;
 import android.view.View;
 
 import android.widget.ListView;
@@ -16,7 +18,7 @@ import android.widget.TextView;
 
 import com.digicular.affiliateBuddy.data.linksContract;
 
-public class DisplayLinksHistory extends AppCompatActivity implements LoaderManager.LoaderCallbacks<Cursor>{
+public class DisplayLinksHistory extends BaseAppCompatActivity implements LoaderManager.LoaderCallbacks<Cursor>{
 
     private static final int LINKS_LOADER = 0;
 
@@ -29,6 +31,16 @@ public class DisplayLinksHistory extends AppCompatActivity implements LoaderMana
 
         ListView lvLinks = (ListView) findViewById(R.id.lv_linksHistory);
         View empty_View = (View) findViewById(R.id.emptyView);
+
+//        Toolbar myToolbar = (Toolbar) findViewById(R.id.Toolbar_myToolbar);
+//        setSupportActionBar(myToolbar);
+//        ActionBar actionBar = getSupportActionBar();
+//        actionBar.setDisplayHomeAsUpEnabled(true);
+//        actionBar.setDisplayShowTitleEnabled(true);
+
+        // Setting ActionBar title
+        getSupportActionBar().setTitle("Your Links History");
+
 
         // Setting Empty view to show when the listView is empty
         lvLinks.setEmptyView(empty_View);

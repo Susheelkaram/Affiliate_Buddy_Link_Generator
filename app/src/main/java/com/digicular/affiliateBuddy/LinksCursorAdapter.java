@@ -5,6 +5,7 @@ import android.content.ClipData;
 import android.content.ClipboardManager;
 import android.content.ContentResolver;
 import android.content.Context;
+import android.content.Intent;
 import android.database.Cursor;
 import android.net.Uri;
 import android.view.LayoutInflater;
@@ -16,26 +17,26 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 public class LinksCursorAdapter extends CursorAdapter{
-
+    Context mContext;
 
     public LinksCursorAdapter(Context context, Cursor cursor){
         super(context, cursor, 0);
+        mContext = context;
     }
 
     @Override
     public View newView(Context context, Cursor cursor, ViewGroup parent) {
-        // TODO: Fill out this method and return the list item view (instead of null)
         return LayoutInflater.from(context).inflate(R.layout.item_link, parent, false);
     }
 
     @Override
     public void bindView(View view, final Context context, Cursor cursor) {
-        // TODO: Fill out this method
         // Getting textviews for individual Link item
         TextView hTitle = (TextView) view.findViewById(R.id.textView_hTitle);
         TextView hUrl = (TextView) view.findViewById(R.id.textView_hUrl);
         Button hCopyButton = (Button) view.findViewById(R.id.button_hCopy);
         Button hDeleteButton = (Button) view.findViewById(R.id.button_hDelete);
+        Button hShareButton = (Button) view.findViewById(R.id.button_hShare);
 
 
         // Getting title and url in current row
@@ -70,6 +71,28 @@ public class LinksCursorAdapter extends CursorAdapter{
                 }
             }
         });
+        hShareButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                MainActivity mainActivity = new MainActivity();
+                mainActivity.shareNowMain(mContext,url);
+            }
+        });
     }
+//    // Share Action Method
+//    public void shareNowMain(String shareText){
+//        if(!shareText.isEmpty()){
+//            Intent shareIntent = new Intent(Intent.ACTION_SEND);
+//            shareIntent.putExtra(Intent.EXTRA_TEXT, shareText);
+//            shareIntent.setType("text/plain");
+//            mContext.startActivity(Intent.createChooser(shareIntent, "Share your Generated link using: "));
+//        }
+//        else {
+//            Toast.makeText(mContext, "Please, generate the link first.", Toast.LENGTH_SHORT).show();
+//            return;
+//        }
+//    }
+
+
 
 }
