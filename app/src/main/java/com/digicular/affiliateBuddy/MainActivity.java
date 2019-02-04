@@ -15,6 +15,7 @@ import android.support.annotation.NonNull;
 import android.support.design.button.MaterialButton;
 import android.support.design.widget.NavigationView;
 import android.support.design.widget.TextInputEditText;
+import android.support.design.widget.TextInputLayout;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
@@ -76,6 +77,7 @@ public class MainActivity extends BaseAppCompatActivity{
     private String selectedAffiliateId = "";
 
     private TextView textView_AppMode;
+    private TextInputLayout textInputLayout;
     private EditText inputUrl;
     private Spinner idSelector;
     private RadioGroup radioLongShort;
@@ -102,6 +104,7 @@ public class MainActivity extends BaseAppCompatActivity{
         generatedUrl = (EditText) findViewById(R.id.txtInput_generatedUrl);
         textView_productTitle = (TextView) findViewById(R.id.textView_productTitle);
         button_share = (Button) findViewById(R.id.button_share);
+
 
         // Setting custom Toolbar or Action bar as default Actionbar
         setupActionBar();

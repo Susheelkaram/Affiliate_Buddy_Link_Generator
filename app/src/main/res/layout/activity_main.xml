@@ -2,10 +2,12 @@
 <android.support.v4.widget.DrawerLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/myDrawerLayout"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:fitsSystemWindows="true">
+    android:fitsSystemWindows="true"
+    android:background="@color/colorWhite">
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
@@ -17,9 +19,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"/>
 
-        <RelativeLayout  xmlns:android="http://schemas.android.com/apk/res/android"
-            xmlns:app="http://schemas.android.com/apk/res-auto"
-            xmlns:tools="http://schemas.android.com/tools"
+        <RelativeLayout
             android:layout_height="match_parent"
             android:layout_width="match_parent"
             tools:context=".MainActivity"
@@ -44,103 +44,135 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_below="@id/logoHeader"
-                android:orientation="vertical"
-                android:padding="10dp">
-
-                <TextView
-                    android:id="@+id/TextView_AppMode"
+                android:orientation="vertical">
+                <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="App Mode"/>
-
-                <android.support.design.widget.TextInputLayout
-                    style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:elevation="5dp"
-                    android:shadowColor="@color/colorBlack"
-                    android:shadowRadius="3"
-                    android:shadowDx="2"
-                    android:shadowDy="4">
-
-                    <EditText
-                        android:id="@+id/txtInput_url"
+                    android:orientation="vertical"
+                    android:background="@color/colorPrimary"
+                    android:padding="10dp"
+                    >
+                    <TextView
+                        android:id="@+id/TextView_AppMode"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_marginBottom="10dp"
-                        android:layout_marginTop="10dp"
-                        android:elevation="5dp"
-                        android:ems="10"
-                        android:hint="@string/txt_hintInputUrl"
-                        android:inputType="textUri"
-                        android:drawableStart="@drawable/ic_link_black_24dp"
-                        android:drawablePadding="5dp"/>
-                </android.support.design.widget.TextInputLayout>
+                        android:text="App Mode"
+                        android:textAlignment="center"
+                        android:visibility="gone"/>
 
-                <TextView
-                    android:id="@+id/textView_productTitle"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:text=""
-                    android:padding="10dp"/>
+                    <TextView
+                        android:id="@+id/textView_productTitle"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:padding="10dp"
+                        android:text=""
+                        android:textAlignment="center"
+                        android:textColor="@color/colorBlack"
+                        android:textSize="17sp"
+                        android:textStyle="bold"/>
 
+                    <android.support.design.widget.TextInputLayout
+                        style="@style/InputUrlTextInputLayout"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        app:boxStrokeColor="@color/colorBlack">
+
+                        <android.support.design.widget.TextInputEditText
+                            android:id="@+id/txtInput_url"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="10dp"
+                            android:layout_marginBottom="10dp"
+                            android:drawableStart="@drawable/ic_link_black_24dp"
+                            android:drawablePadding="5dp"
+                            android:ems="10"
+                            android:hint="@string/txt_hintInputUrl"
+                            android:inputType="textUri" />
+                    </android.support.design.widget.TextInputLayout>
+                </LinearLayout>
                 <RelativeLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="horizontal"
-                    android:layout_margin="5dp">
-                    <TextView
-                        android:id="@+id/textView2"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:textColor="@color/colorAccent"
-                        android:text="@string/txt_labelTag"
-                        android:textAllCaps="true"
-                        android:layout_alignParentLeft="true"/>
-
-                    <Spinner
-                        android:id="@+id/affId_selector"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:autofillHints="Select Affiliate ID"
-                        android:layout_alignParentRight="true"/>
-                </RelativeLayout>
-
-                <RadioGroup
-                    android:id="@+id/radioGroup_longShort"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
                     android:layout_marginTop="10dp"
                     android:layout_marginBottom="10dp"
-                    android:gravity="center_horizontal"
-                    android:orientation="horizontal">
+                    android:padding="10dp">
 
-                    <RadioButton
-                        android:id="@+id/radio_long"
+                    <TextView
+                        android:id="@+id/TV_label"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:text="@string/txt_longLink" />
-
-                    <RadioButton
-                        android:id="@+id/radio_short"
+                        android:layout_alignParentLeft="true"
+                        android:text="@string/txt_labelTag"
+                        android:textAllCaps="true"
+                        android:textColor="@color/colorAccent"
+                        android:visibility="gone"/>
+                    <Spinner
+                        android:id="@+id/affId_selector"
+                        style="@style/Style_Affid_Spinner"
+                        android:background="@drawable/rectangle_spinner"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:text="@string/txt_shortLink" />
+                        android:minWidth="150dp"
+                        android:maxWidth="200dp"
+                        android:autofillHints="Select Affiliate ID"
+                        android:layout_centerVertical="true"
+                        android:layout_alignParentStart="true"/>
 
-                </RadioGroup>
+                    <CheckBox
+                        android:id="@+id/checkBox"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_centerVertical="true"
+                        android:layout_marginStart="40dp"
+                        android:layout_toEndOf="@id/affId_selector"
+                        android:scaleX="1.2"
+                        android:scaleY="1.2"
+                        android:text="Short Link" />
+
+
+                </RelativeLayout>
+
+                <!--<RadioGroup-->
+                    <!--android:id="@+id/radioGroup_longShort"-->
+                    <!--android:layout_width="match_parent"-->
+                    <!--android:layout_height="wrap_content"-->
+                    <!--android:layout_marginTop="10dp"-->
+                    <!--android:layout_marginBottom="10dp"-->
+                    <!--android:gravity="center_horizontal"-->
+                    <!--android:orientation="horizontal"-->
+                    <!--android:visibility="gone">-->
+
+                    <!--<RadioButton-->
+                        <!--android:id="@+id/radio_long"-->
+                        <!--android:layout_width="wrap_content"-->
+                        <!--android:layout_height="wrap_content"-->
+                        <!--android:layout_weight="1"-->
+                        <!--android:text="@string/txt_longLink" />-->
+
+                    <!--<RadioButton-->
+                        <!--android:id="@+id/radio_short"-->
+                        <!--android:layout_width="wrap_content"-->
+                        <!--android:layout_height="wrap_content"-->
+                        <!--android:layout_weight="1"-->
+                        <!--android:text="@string/txt_shortLink" />-->
+
+                <!--</RadioGroup>-->
 
                 <android.support.design.button.MaterialButton
                     android:id="@+id/button_generate"
-                    android:layout_width="wrap_content"
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_gravity="center_horizontal"
                     android:background="@color/colorPrimaryDark"
                     android:textColor="@color/colorWhite"
+                    android:elevation="5dp"
+                    android:shadowColor="@color/colorBlack"
                     android:text="@string/txt_generate_link"
                     android:textSize="16sp"
+                    android:textStyle="bold"
                     android:padding="10dp"
+                    android:layout_margin="10dp"
                     android:onClick="generateClick"
                     style="@style/Widget.MaterialComponents.Button"
                     android:layout_marginBottom="5dp"/>
@@ -148,97 +180,101 @@
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:orientation="horizontal">
+                    android:orientation="horizontal"
+                    android:padding="10dp">
 
-                    <android.support.design.widget.TextInputLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
-                        android:layout_weight="1"
-                        android:hint="@string/txt_hintOutputUrl"
-                        android:layout_marginRight="5dp">
+                    <!--<android.support.design.widget.TextInputLayout-->
+                        <!--android:layout_width="match_parent"-->
+                        <!--android:layout_height="wrap_content"-->
+                        <!--style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"-->
+                        <!--android:layout_weight="1"-->
+                        <!--android:hint="@string/txt_hintOutputUrl"-->
+                        <!--android:layout_marginRight="5dp">-->
 
                         <EditText
                             android:id="@+id/txtInput_generatedUrl"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
+                            android:background="@drawable/textfield_rectangle"
                             android:layout_weight="1"
                             android:inputType="textMultiLine"
                             android:layout_gravity="center_vertical"
                             android:padding="10dp"
                             android:paddingBottom="20dp"
+                            android:hint="@string/txt_hintOutputUrl"
                             android:lines="3"
                             android:maxLines="4"/>
 
-                    </android.support.design.widget.TextInputLayout>
+                    <!--</android.support.design.widget.TextInputLayout>-->
                     <LinearLayout
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:orientation="vertical"
-                        android:padding="1dp">
+                        android:orientation="vertical">
 
                         <android.support.design.button.MaterialButton
                             android:id="@+id/button_copyToClipboard"
-                            style="@style/Widget.MaterialComponents.Button.TextButton.Icon"
+                            style="@style/Widget.MaterialComponents.Button.OutlinedButton.Icon"
                             android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_marginTop="-2dp"
+                            android:layout_height="match_parent"
+                            android:layout_marginStart="5dp"
+                            android:layout_weight="1"
                             android:onClick="copyToClipboard"
-                            android:paddingRight="6dp"
+                            android:paddingStart="8dp"
+                            android:paddingEnd="4dp"
                             android:paddingTop="8dp"
                             android:paddingBottom="8dp"
                             android:minWidth="10dp"
                             app:icon="@drawable/ic_content_copy_black_24dp"
-                            android:background="@color/colorExtraLightGrey" />
-                        <View
-                            android:layout_width="match_parent"
-                            android:layout_height="2dp"
-                            android:background="@color/colorExtraLightGrey"/>
+                            app:strokeColor="@color/colorPrimaryDark"
+                            app:strokeWidth="2dp"/>
 
                         <android.support.design.button.MaterialButton
                             android:id="@+id/button_share"
-                            style="@style/Widget.MaterialComponents.Button.TextButton.Icon"
+                            style="@style/Widget.MaterialComponents.Button.OutlinedButton.Icon"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:layout_marginTop="-2dp"
-                            android:paddingRight="6dp"
+                            android:layout_weight="50"
+                            android:layout_marginStart="5dp"
+                            android:paddingStart="8dp"
+                            android:paddingEnd="4dp"
                             android:paddingTop="8dp"
                             android:paddingBottom="8dp"
                             android:minWidth="10dp"
                             app:icon="@drawable/ic_share_black_24dp"
-                            android:background="@color/colorExtraLightGrey" />
+                            app:strokeColor="@color/colorPrimaryDark"
+                            app:strokeWidth="2dp"/>
 
                     </LinearLayout>
 
                 </LinearLayout>
 
                 <!--<Button-->
-                    <!--android:id="@+id/dbTest"-->
-                    <!--android:layout_width="match_parent"-->
-                    <!--android:layout_height="wrap_content"-->
-                    <!--android:text="Add to db"-->
-                    <!--android:onClick="addToDb"/>-->
+                <!--android:id="@+id/dbTest"-->
+                <!--android:layout_width="match_parent"-->
+                <!--android:layout_height="wrap_content"-->
+                <!--android:text="Add to db"-->
+                <!--android:onClick="addToDb"/>-->
 
                 <!--<android.support.design.button.MaterialButton-->
-                    <!--android:id="@+id/buttonLinkHistory"-->
-                    <!--android:layout_width="wrap_content"-->
-                    <!--android:layout_height="wrap_content"-->
-                    <!--style="@style/Widget.MaterialComponents.Button.TextButton"-->
-                    <!--android:text="View All links"-->
-                    <!--android:layout_gravity="center_horizontal"-->
-                    <!--android:onClick="viewLinkHistory"/>-->
+                <!--android:id="@+id/buttonLinkHistory"-->
+                <!--android:layout_width="wrap_content"-->
+                <!--android:layout_height="wrap_content"-->
+                <!--style="@style/Widget.MaterialComponents.Button.TextButton"-->
+                <!--android:text="View All links"-->
+                <!--android:layout_gravity="center_horizontal"-->
+                <!--android:onClick="viewLinkHistory"/>-->
 
             </LinearLayout>
 
             <!--<TextView-->
-                <!--android:layout_width="match_parent"-->
-                <!--android:layout_height="wrap_content"-->
-                <!--android:textSize="12sp"-->
-                <!--android:text="@string/developer_credits"-->
-                <!--android:layout_alignParentBottom="true"-->
-                <!--android:paddingTop="5dp"-->
-                <!--android:paddingBottom="5dp"-->
-                <!--android:gravity="center_horizontal"/>-->
+            <!--android:layout_width="match_parent"-->
+            <!--android:layout_height="wrap_content"-->
+            <!--android:textSize="12sp"-->
+            <!--android:text="@string/developer_credits"-->
+            <!--android:layout_alignParentBottom="true"-->
+            <!--android:paddingTop="5dp"-->
+            <!--android:paddingBottom="5dp"-->
+            <!--android:gravity="center_horizontal"/>-->
 
         </RelativeLayout>
 
