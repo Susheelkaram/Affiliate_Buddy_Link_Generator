@@ -32,6 +32,7 @@ public class LinksCursorAdapter extends CursorAdapter{
     @Override
     public void bindView(View view, final Context context, Cursor cursor) {
         // Getting textviews for individual Link item
+        TextView hSite = (TextView) view.findViewById(R.id.textView_hSite);
         TextView hTitle = (TextView) view.findViewById(R.id.textView_hTitle);
         TextView hUrl = (TextView) view.findViewById(R.id.textView_hUrl);
         Button hCopyButton = (Button) view.findViewById(R.id.button_hCopy);
@@ -40,6 +41,7 @@ public class LinksCursorAdapter extends CursorAdapter{
 
 
         // Getting title and url in current row
+        String site = cursor.getString(cursor.getColumnIndexOrThrow(linksContract.linksEntry.COLUMN_PROGRAM));
         String title = cursor.getString(cursor.getColumnIndexOrThrow(linksContract.linksEntry.COLUMN_TITLE));
         final String url = cursor.getString(cursor.getColumnIndexOrThrow(linksContract.linksEntry.COLUMN_URL));
         int id = cursor.getInt(cursor.getColumnIndexOrThrow(linksContract.linksEntry.COLUMN_ID));
@@ -47,6 +49,7 @@ public class LinksCursorAdapter extends CursorAdapter{
 
 
         // Setting values to Textviews
+        hSite.setText(site);
         hTitle.setText(title);
         hUrl.setText(url);
         hCopyButton.setOnClickListener(new View.OnClickListener() {

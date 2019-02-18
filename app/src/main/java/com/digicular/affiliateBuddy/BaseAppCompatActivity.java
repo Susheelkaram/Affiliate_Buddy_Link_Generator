@@ -12,6 +12,9 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
+import android.view.View;
+import android.widget.ImageView;
+
 /*
 * @author Susheel Karam (Digicular.com)
 *
@@ -21,11 +24,15 @@ public class BaseAppCompatActivity extends AppCompatActivity {
     private Toolbar myToolbar;
     private DrawerLayout myDrawerLayout;
     private NavigationView myNavigationView;
+    private ImageView headerImageView;
 
     @Override
     public void setContentView(int layoutResID) {
         super.setContentView(layoutResID);
         Toolbar toolbar = findViewById(R.id.Toolbar_myToolbar);
+        headerImageView = findViewById(R.id.imageView_Header);
+        headerImageView.setVisibility(View.GONE);
+
         setSupportActionBar(toolbar);
         ActionBar actionBar = this.getSupportActionBar();
         actionBar.setDisplayShowTitleEnabled(true);

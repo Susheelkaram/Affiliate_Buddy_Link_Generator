@@ -21,8 +21,6 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ListView;
 
-import com.digicular.affiliateBuddy.data.AffIdCursorAdapter;
-
 public class Affiliate_id_editor extends BaseAppCompatActivity implements LoaderManager.LoaderCallbacks<Cursor>{
 
     public static final int AFFID_LOADER = 0;
@@ -38,15 +36,12 @@ public class Affiliate_id_editor extends BaseAppCompatActivity implements Loader
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_affiliate_id_editor);
 
-//        ListView lv_affIds = (ListView) findViewById(R.id.listView_affIds);
         recyclerView_affIds = (RecyclerView) findViewById(R.id.recyclerView_ExistingIds);
         recyclerView_affIds.setLayoutManager(new LinearLayoutManager(this));
 
         final EditText et_affIdInput = (EditText) findViewById(R.id.editText_AffIdInput);
         Button bt_addAffId = (Button) findViewById(R.id.button_addAffId);
 
-//        affIdCursorAdapter = new AffIdCursorAdapter(this, null);
-//        lv_affIds.setAdapter(affIdCursorAdapter)
 
         Intent programNameIntent = getIntent();
         String intentProgramName = programNameIntent.getStringExtra("SITE_NAME");
@@ -85,7 +80,6 @@ public class Affiliate_id_editor extends BaseAppCompatActivity implements Loader
 
     @Override
     public void onLoadFinished(@NonNull Loader<Cursor> loader, Cursor cursor) {
-//        affIdCursorAdapter.swapCursor(cursor);
         cursor.moveToFirst();
         affIdAdapter = new AffIdRecyclerCursorAdapter(this, cursor);
         recyclerView_affIds.setAdapter(affIdAdapter);
@@ -93,6 +87,5 @@ public class Affiliate_id_editor extends BaseAppCompatActivity implements Loader
 
     @Override
     public void onLoaderReset(@NonNull Loader<Cursor> loader) {
-//        affIdCursorAdapter.swapCursor(null);
     }
 }

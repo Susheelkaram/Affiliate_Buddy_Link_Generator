@@ -32,11 +32,13 @@ public final class linksContract{
         public static final String COLUMN_ID = BaseColumns._ID;
         public static final String COLUMN_DATETIME = "date_time";
         public static final String COLUMN_TITLE = "title";
+        public static final String COLUMN_PROGRAM = "program_name";
         public static final String COLUMN_URL = "url";
 
         public static String SQL_CREATE_URLS_TABLE = "CREATE TABLE " + linksEntry.TABLE_NAME + "("
                 + linksEntry.COLUMN_ID + " INTEGER PRIMARY KEY AUTOINCREMENT,"
                 + linksEntry.COLUMN_DATETIME + " TEXT, "
+                + linksEntry.COLUMN_PROGRAM + " TEXT, "
                 + linksEntry.COLUMN_TITLE + " TEXT, "
                 + linksEntry.COLUMN_URL + " TEXT NOT NULL);";
 

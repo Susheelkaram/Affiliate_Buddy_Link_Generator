@@ -16,7 +16,7 @@
             <stroke android:width="2dp" android:color="@color/colorGrey"/>
         </shape>
     </item>
-    <item android:gravity="center_vertical|right" android:drawable="@drawable/ic_keyboard_arrow_down_black_24dp" android:width="30dp" android:height="30dp" android:right="0dp">
+    <item android:gravity="center_vertical|right" android:drawable="@drawable/ic_keyboard_arrow_down_black_24dp" android:width="24dp" android:height="24dp" android:right="0dp">
         <!--<layer-list>-->
             <!--&lt;!&ndash;<item android:width="10dp" android:height="10dp"  android:gravity="center" android:bottom="5dp">&ndash;&gt;-->
                 <!--&lt;!&ndash;<rotate&ndash;&gt;-->

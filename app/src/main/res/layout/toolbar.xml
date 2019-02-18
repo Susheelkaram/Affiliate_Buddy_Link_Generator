@@ -14,5 +14,14 @@
         app:titleTextColor="@color/colorBlack"
         android:outlineSpotShadowColor="@color/colorBlack"
         android:textAlignment="center"
-        app:popupTheme="@style/ThemeOverlay.AppCompat.Light"/>
+        app:popupTheme="@style/ThemeOverlay.AppCompat.Light">
+        <ImageView
+            android:id="@+id/imageView_Header"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:src="@drawable/affo_logo"
+            android:layout_gravity="left"
+            android:layout_marginEnd="70dp"
+            android:padding="10dp"/>
+    </android.support.v7.widget.Toolbar>
 </android.support.design.widget.AppBarLayout>

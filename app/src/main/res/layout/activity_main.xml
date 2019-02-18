@@ -26,39 +26,28 @@
             android:orientation="vertical"
             android:background="@color/colorWhite">
 
-            <TextView
-                android:id="@+id/logoHeader"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:background="@color/colorPrimaryDark"
-                android:fontFamily="@font/opensans_regular"
-                android:gravity="center_horizontal"
-                android:paddingTop="15dp"
-                android:paddingBottom="15dp"
-                android:text="@string/txt_logoTitle"
-                android:textColor="@color/colorWhite"
-                android:textSize="25sp"
-                android:visibility="gone"/>
-
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_below="@id/logoHeader"
+                android:layout_alignParentTop="true"
                 android:orientation="vertical">
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="vertical"
                     android:background="@color/colorPrimary"
-                    android:padding="10dp"
-                    >
+                    android:padding="10dp">
                     <TextView
                         android:id="@+id/TextView_AppMode"
-                        android:layout_width="match_parent"
+                        android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="App Mode"
-                        android:textAlignment="center"
-                        android:visibility="gone"/>
+                        android:background="@drawable/rectangle_badge"
+                        android:textColor="@color/colorWhite"
+                        android:layout_gravity="center_horizontal"
+                        android:text="Site"
+                        android:textSize="10sp"
+                        android:textAllCaps="true"
+                        android:textAlignment="center" />
 
                     <TextView
                         android:id="@+id/textView_productTitle"
@@ -98,33 +87,22 @@
                     android:layout_marginBottom="10dp"
                     android:padding="10dp">
 
-                    <TextView
-                        android:id="@+id/TV_label"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_alignParentLeft="true"
-                        android:text="@string/txt_labelTag"
-                        android:textAllCaps="true"
-                        android:textColor="@color/colorAccent"
-                        android:visibility="gone"/>
                     <Spinner
                         android:id="@+id/affId_selector"
-                        style="@style/Style_Affid_Spinner"
                         android:background="@drawable/rectangle_spinner"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:minWidth="150dp"
-                        android:maxWidth="200dp"
+                        android:minWidth="190dp"
                         android:autofillHints="Select Affiliate ID"
                         android:layout_centerVertical="true"
                         android:layout_alignParentStart="true"/>
 
                     <CheckBox
-                        android:id="@+id/checkBox"
+                        android:id="@+id/checkBox_Shorten"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_centerVertical="true"
-                        android:layout_marginStart="40dp"
+                        android:layout_marginStart="20dp"
                         android:layout_toEndOf="@id/affId_selector"
                         android:scaleX="1.2"
                         android:scaleY="1.2"
@@ -132,32 +110,6 @@
 
 
                 </RelativeLayout>
-
-                <!--<RadioGroup-->
-                    <!--android:id="@+id/radioGroup_longShort"-->
-                    <!--android:layout_width="match_parent"-->
-                    <!--android:layout_height="wrap_content"-->
-                    <!--android:layout_marginTop="10dp"-->
-                    <!--android:layout_marginBottom="10dp"-->
-                    <!--android:gravity="center_horizontal"-->
-                    <!--android:orientation="horizontal"-->
-                    <!--android:visibility="gone">-->
-
-                    <!--<RadioButton-->
-                        <!--android:id="@+id/radio_long"-->
-                        <!--android:layout_width="wrap_content"-->
-                        <!--android:layout_height="wrap_content"-->
-                        <!--android:layout_weight="1"-->
-                        <!--android:text="@string/txt_longLink" />-->
-
-                    <!--<RadioButton-->
-                        <!--android:id="@+id/radio_short"-->
-                        <!--android:layout_width="wrap_content"-->
-                        <!--android:layout_height="wrap_content"-->
-                        <!--android:layout_weight="1"-->
-                        <!--android:text="@string/txt_shortLink" />-->
-
-                <!--</RadioGroup>-->
 
                 <android.support.design.button.MaterialButton
                     android:id="@+id/button_generate"
@@ -183,17 +135,10 @@
                     android:orientation="horizontal"
                     android:padding="10dp">
 
-                    <!--<android.support.design.widget.TextInputLayout-->
-                        <!--android:layout_width="match_parent"-->
-                        <!--android:layout_height="wrap_content"-->
-                        <!--style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"-->
-                        <!--android:layout_weight="1"-->
-                        <!--android:hint="@string/txt_hintOutputUrl"-->
-                        <!--android:layout_marginRight="5dp">-->
 
                         <EditText
                             android:id="@+id/txtInput_generatedUrl"
-                            android:layout_width="match_parent"
+                            android:layout_width="0dp"
                             android:layout_height="wrap_content"
                             android:background="@drawable/textfield_rectangle"
                             android:layout_weight="1"
@@ -205,24 +150,27 @@
                             android:lines="3"
                             android:maxLines="4"/>
 
-                    <!--</android.support.design.widget.TextInputLayout>-->
+
                     <LinearLayout
                         android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:orientation="vertical">
+                        android:layout_height="match_parent"
+                        android:orientation="vertical"
+                        android:layout_margin="0dp"
+                        android:paddingLeft="5dp">
 
                         <android.support.design.button.MaterialButton
                             android:id="@+id/button_copyToClipboard"
                             style="@style/Widget.MaterialComponents.Button.OutlinedButton.Icon"
                             android:layout_width="wrap_content"
-                            android:layout_height="match_parent"
-                            android:layout_marginStart="5dp"
+                            android:layout_height="wrap_content"
                             android:layout_weight="1"
+                            android:layout_marginBottom="-5dp"
+                            android:layout_marginTop="-6dp"
                             android:onClick="copyToClipboard"
                             android:paddingStart="8dp"
                             android:paddingEnd="4dp"
-                            android:paddingTop="8dp"
-                            android:paddingBottom="8dp"
+                            android:paddingTop="18dp"
+                            android:paddingBottom="18dp"
                             android:minWidth="10dp"
                             app:icon="@drawable/ic_content_copy_black_24dp"
                             app:strokeColor="@color/colorPrimaryDark"
@@ -233,12 +181,12 @@
                             style="@style/Widget.MaterialComponents.Button.OutlinedButton.Icon"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:layout_weight="50"
-                            android:layout_marginStart="5dp"
+                            android:layout_weight="1"
+                            android:layout_marginBottom="-6dp"
                             android:paddingStart="8dp"
                             android:paddingEnd="4dp"
-                            android:paddingTop="8dp"
-                            android:paddingBottom="8dp"
+                            android:paddingTop="18dp"
+                            android:paddingBottom="18dp"
                             android:minWidth="10dp"
                             app:icon="@drawable/ic_share_black_24dp"
                             app:strokeColor="@color/colorPrimaryDark"
@@ -248,33 +196,7 @@
 
                 </LinearLayout>
 
-                <!--<Button-->
-                <!--android:id="@+id/dbTest"-->
-                <!--android:layout_width="match_parent"-->
-                <!--android:layout_height="wrap_content"-->
-                <!--android:text="Add to db"-->
-                <!--android:onClick="addToDb"/>-->
-
-                <!--<android.support.design.button.MaterialButton-->
-                <!--android:id="@+id/buttonLinkHistory"-->
-                <!--android:layout_width="wrap_content"-->
-                <!--android:layout_height="wrap_content"-->
-                <!--style="@style/Widget.MaterialComponents.Button.TextButton"-->
-                <!--android:text="View All links"-->
-                <!--android:layout_gravity="center_horizontal"-->
-                <!--android:onClick="viewLinkHistory"/>-->
-
             </LinearLayout>
-
-            <!--<TextView-->
-            <!--android:layout_width="match_parent"-->
-            <!--android:layout_height="wrap_content"-->
-            <!--android:textSize="12sp"-->
-            <!--android:text="@string/developer_credits"-->
-            <!--android:layout_alignParentBottom="true"-->
-            <!--android:paddingTop="5dp"-->
-            <!--android:paddingBottom="5dp"-->
-            <!--android:gravity="center_horizontal"/>-->
 
         </RelativeLayout>
 

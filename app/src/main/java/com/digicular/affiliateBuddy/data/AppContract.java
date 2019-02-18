@@ -18,13 +18,13 @@ public final class AppContract {
     public static final int FLIPKART_TYPE_CODE = 202;
     public static final int GEARBEST_TYPE_CODE = 203;
 
-    protected HashMap<Integer, String> appCodeMap = new HashMap<Integer, String>()
+    protected static HashMap<Integer, String> appCodeMap = new HashMap<Integer, String>()
                                             {{
                                                 put(AMAZON_TYPE_CODE,AMAZON_TYPE_ST);
                                                 put(FLIPKART_TYPE_CODE, FLIPKART_TYPE_ST);
                                                 put(GEARBEST_TYPE_CODE, GEARBEST_TYPE_ST);
                                             }};
-    public int getTypeCode(String value){
+    public static int getTypeCode(String value){
         for (Map.Entry entry : appCodeMap.entrySet()){
             if (entry.getValue().equals(value)) {
                 return (Integer) entry.getKey();
@@ -32,7 +32,7 @@ public final class AppContract {
         }
         return 0;
     }
-    public String getTypeString(int key){
+    public static String getTypeString(int key){
         if(appCodeMap.containsKey(key)){
             return appCodeMap.get(key);
         }
