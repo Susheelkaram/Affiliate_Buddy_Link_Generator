@@ -11,18 +11,25 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
+        <activity android:name=".staticActivities.HowToUse"></activity>
+        <activity
+            android:name=".staticActivities.AboutApp"
+            android:label="About App and Developer" />
         <activity
             android:name=".MainActivity"
             android:label="@string/app_title"
-            android:theme="@style/AppTheme"
-            android:screenOrientation="portrait">
+            android:screenOrientation="portrait"
+            android:theme="@style/AppTheme">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
+
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
             <intent-filter>
                 <action android:name="android.intent.action.SEND" />
+
                 <category android:name="android.intent.category.DEFAULT" />
+
                 <data android:mimeType="text/plain" />
             </intent-filter>
         </activity>
@@ -34,25 +41,29 @@
 
         <activity
             android:name=".DisplayLinksHistory"
+            android:label="Your Links History"
             android:parentActivityName=".MainActivity"
-            android:theme="@style/AppTheme"
-            android:screenOrientation="portrait">
+            android:screenOrientation="portrait"
+            android:theme="@style/AppTheme">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value=".MainActivity" />
         </activity>
         <activity android:name=".Affiliate_id_editor" />
-        <activity android:name=".SettingsActivity">
+        <activity
+            android:name=".SettingsActivity"
+            android:label="Settings">
             <intent-filter>
                 <action android:name="android.intent.action.VIEW" />
+
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.BROWSABLE" />
-                <!-- Accepts URIs that begin with "example://gizmos” -->
-                <data android:scheme="affo"
-                    android:host="bitly.setup" />
+
+                <data
+                    android:host="bitly.setup"
+                    android:scheme="affo" />
             </intent-filter>
         </activity>
-        <activity android:name=".BitlyShorten"/>
     </application>
 
 </manifest>

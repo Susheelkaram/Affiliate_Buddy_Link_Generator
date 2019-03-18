@@ -32,15 +32,6 @@ public class DisplayLinksHistory extends BaseAppCompatActivity implements Loader
         ListView lvLinks = (ListView) findViewById(R.id.lv_linksHistory);
         View empty_View = (View) findViewById(R.id.emptyView);
 
-//        Toolbar myToolbar = (Toolbar) findViewById(R.id.Toolbar_myToolbar);
-//        setSupportActionBar(myToolbar);
-//        ActionBar actionBar = getSupportActionBar();
-//        actionBar.setDisplayHomeAsUpEnabled(true);
-//        actionBar.setDisplayShowTitleEnabled(true);
-
-        // Setting ActionBar title
-        getSupportActionBar().setTitle("Your Links History");
-
 
         // Setting Empty view to show when the listView is empty
         lvLinks.setEmptyView(empty_View);
@@ -48,49 +39,10 @@ public class DisplayLinksHistory extends BaseAppCompatActivity implements Loader
         linksCursorAdapter = new LinksCursorAdapter(this, null);
         lvLinks.setAdapter(linksCursorAdapter);
 
-        // Tracking changes in DB and updating in View
+        // Tracking changes in DB and updating in View (CursorLoader)
         getSupportLoaderManager().initLoader(LINKS_LOADER, null, this);
 
     }
-//    private void displayDatabaseInfo() {
-////        // To access our database, we instantiate our subclass of SQLiteOpenHelper
-////        // and pass the context, which is the current activity.
-////        linksDbHelper mDbHelper = new linksDbHelper(this);
-////
-////        // Create and/or open a database to read from it
-////        SQLiteDatabase db = mDbHelper.getReadableDatabase();
-//        String[] projection = {};
-//        String selection = "";
-//        String[] selectionArgs = {};
-//        String sortOrder = linksContract.linksEntry.COLUMN_ID + " DESC";
-//        // Perform this raw SQL query "SELECT * FROM pets"
-//        // to get a Cursor that contains all rows from the pets table.
-//        Cursor cursor = getContentResolver().query(linksContract.linksEntry.CONTENT_URI, null, null, null, sortOrder);
-///*
-//        cursor.moveToLast();
-//        int columnIndexUrl = cursor.getColumnIndex(linksContract.linksEntry.COLUMN_URL);
-//        int columnIndexTitle = cursor.getColumnIndex(linksContract.linksEntry.COLUMN_TITLE);
-//        int columnIndexDate = cursor.getColumnIndex(linksContract.linksEntry.COLUMN_DATETIME);
-//        String lastLine = cursor.getString(columnIndexDate) + " - " + cursor.getString(columnIndexTitle) + " - " + cursor.getString(columnIndexUrl);
-//        try {
-//            // Display the number of rows in the Cursor (which reflects the number of rows in the
-//            // pets table in the database).
-//            TextView displayView = (TextView) findViewById(R.id.display_db);
-//            displayView.setText("Number of rows in pets database table: " + lastLine);
-//        } finally {
-//            // Always close the cursor when you're done reading from it. This releases all its
-//            // resources and makes it invalid.
-//            cursor.close();
-//        }
-//*/      //empty_View.setVisibility(View.GONE);
-//        ListView lvLinks = (ListView) findViewById(R.id.lv_linksHistory);
-//        View empty_View = (View) findViewById(R.id.emptyView);
-//
-//        lvLinks.setEmptyView(empty_View);
-//
-//        linksCursorAdapter = new LinksCursorAdapter(this, cursor);
-//        lvLinks.setAdapter(linksCursorAdapter);
-//    }
 
     @NonNull
     @Override

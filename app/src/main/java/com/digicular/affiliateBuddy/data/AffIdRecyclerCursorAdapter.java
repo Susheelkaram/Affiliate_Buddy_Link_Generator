@@ -98,8 +98,7 @@ public class AffIdRecyclerCursorAdapter extends RecyclerView.Adapter<AffIdRecycl
                 deleteDialog.show();
                 Button positiveButton = deleteDialog.getButton(AlertDialog.BUTTON_POSITIVE);
                 Button negativeButton = deleteDialog.getButton(AlertDialog.BUTTON_NEGATIVE);
-//                negativeButton.setBackgroundColor(mContext.getResources().getColor(R.color.colorWhite));
-//                negativeButton.setTextColor(mContext.getResources().getColor(R.color.colorAccent));
+
                 LinearLayout.LayoutParams  LPGravity = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT);
                 LPGravity.rightMargin = 20;
                 negativeButton.setLayoutParams(LPGravity);

@@ -1,11 +1,8 @@
 package com.digicular.affiliateBuddy;
 
 import com.digicular.affiliateBuddy.data.AppContract;
-import android.content.Context;
+
 import android.util.Log;
-import android.widget.Toast;
-import com.digicular.affiliateBuddy.MainActivity;
-import com.digicular.affiliateBuddy.data.SiteDetector;
 
 public class LinkGenerator {
 
@@ -13,6 +10,7 @@ public class LinkGenerator {
 //    protected static final int AMAZON_COM = AppContract.AMAZONCOM_TYPE_CODE;
     protected static final int FLIPKART = AppContract.FLIPKART_TYPE_CODE;
     protected static final int GEARBEST = AppContract.GEARBEST_TYPE_CODE;
+    protected static final int BANGGOOD = AppContract.BANGGOOD_TYPE_CODE;
 
     protected static final String LOG_TAG = "Link Generator";
 
@@ -25,6 +23,7 @@ public class LinkGenerator {
         final String amazon_tagKeyword = "tag=";
         final String flipkart_tagKeyword = "affid=";
         final String gearbest_tagKeyword = "lkid=";
+        final String banggood_tagKeyword = "p=";
 
         switch (generatorMode){
 
@@ -71,6 +70,19 @@ public class LinkGenerator {
                 }
                 else {
                     generatedLink = linkAddress + "?" + gearbest_tagKeyword + selectedAssociateId;
+                }
+                break;
+            case BANGGOOD:
+                if (linkAddress.contains("?")) {
+                    linkAddress = linkAddress.split("\\?")[0];
+                    generatedLink = linkAddress + "?" + banggood_tagKeyword + selectedAssociateId;
+                    //generatedLink = linkAddress + "&" + amazon_tagKeyword + selectedAssociateId;
+                }
+                else if (linkAddress.charAt(linkAddress.length() - 1) != '/') {
+                    generatedLink = linkAddress + "/?" + banggood_tagKeyword + selectedAssociateId;
+                }
+                else {
+                    generatedLink = linkAddress + "?" + banggood_tagKeyword + selectedAssociateId;
                 }
                 break;
 

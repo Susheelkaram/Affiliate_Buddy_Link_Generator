@@ -1,4 +1,6 @@
-package com.digicular.affiliateBuddy.data;
+package com.digicular.affiliateBuddy.utils;
+
+import com.digicular.affiliateBuddy.data.AppContract;
 
 import java.util.HashMap;
 import java.util.regex.Pattern;
@@ -15,9 +17,9 @@ public class SiteDetector {
         sitesMap.put(Pattern.compile("^(https:\\/\\/|http:\\/\\/)?(www[.])?([aA]mazon[.](com|in|ca|co[.]uk|cn|com[.]mx|com[.]au|com[.]br|co[.]jp|com[.]sg|com[.]tr|fr|de|it|nl|es))(\\/).{0,}?$"), AppContract.AMAZON_TYPE_CODE);
         sitesMap.put(Pattern.compile("^(https:\\/\\/|http:\\/\\/)?(www[.]|dl[.])?([fF]lipkart[.]com)(\\/).{0,}?$"), AppContract.FLIPKART_TYPE_CODE);
         sitesMap.put(Pattern.compile("^(https:\\/\\/|http:\\/\\/)?(www[.]|m[.])?([gG]earbest[.]com)(\\/).{0,}?$"), AppContract.GEARBEST_TYPE_CODE);
-        sitesMap.put(Pattern.compile("^(https:\\/\\/|http:\\/\\/)?([gG]earbest[.])?(app[.]link)(\\/).{0,}?$"), AppContract.GEARBEST_TYPE_CODE);
-        // TODO: Add Banggood && NewEgg
-        // Banggood - ?p=AffiliateId
+        sitesMap.put(Pattern.compile("^(https:\\/\\/|http:\\/\\/)?(www[.]|m[.])?([bB]anggood[.])(com|in)(\\/).{0,}?$"), AppContract.BANGGOOD_TYPE_CODE);
+        sitesMap.put(Pattern.compile("^(https:\\/\\/|http:\\/\\/)?([gG]earbest[.])(app[.]link)(\\/).{0,}?$"), AppContract.GEARBEST_TYPE_CODE);
+        sitesMap.put(Pattern.compile("^(https:\\/\\/|http:\\/\\/)?([bB]anggood[.])(app[.]link)(\\/).{0,}?$"), AppContract.BANGGOOD_TYPE_CODE);
     }
 
     /*

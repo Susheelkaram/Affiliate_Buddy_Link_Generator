@@ -5,8 +5,10 @@ import android.content.ClipboardManager;
 import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.net.Uri;
+import android.net.sip.SipSession;
 import android.os.AsyncTask;
 import android.support.annotation.NonNull;
 import android.support.design.button.MaterialButton;
@@ -23,14 +25,13 @@ import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.ImageView;
-import android.widget.RadioGroup;
 import android.widget.SimpleCursorAdapter;
 import android.widget.Spinner;
+import android.widget.Switch;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -45,15 +46,18 @@ import com.bitly.Error;
 import com.bitly.Response;
 import com.digicular.affiliateBuddy.data.AppContract;
 
-import com.digicular.affiliateBuddy.data.SiteDetector;
+import com.digicular.affiliateBuddy.staticActivities.AboutApp;
+import com.digicular.affiliateBuddy.utils.SiteDetector;
 import com.digicular.affiliateBuddy.data.linksContract.linksEntry;
 
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.regex.Pattern;
 /*
 * @author Susheel Karam
+* Website - SusheelKaram.com
 * */
 
 public class MainActivity extends BaseAppCompatActivity{
@@ -71,6 +75,7 @@ public class MainActivity extends BaseAppCompatActivity{
     private String txt_outputUrl;
     private String tagKeyword = "tag=";
     private String selectedAffiliateId = "";
+    private boolean isAutoShortenEnabled;
 
     private TextView textView_AppMode;
     private TextInputLayout textInputLayout;
@@ -89,8 +94,12 @@ public class MainActivity extends BaseAppCompatActivity{
     private ClipboardManager clipboardManager;
 
     // Link Shortening
-    private static final String ACCESS_TOKEN= "3f1fa331442b1cad7ad50c76c788bff6daf45b44";
-    private static LinkShortener linkShortener2;
+    private static String ACCESS_TOKEN= null;
+    private static LinkShortener linkShortener;
+
+    // Shared Preferences
+    SharedPreferences appPreferences;
+    SharedPreferences.OnSharedPreferenceChangeListener preferenceChangeListener;
 
     @Override
     protected void onCreate(Bundle savedInstanceState){
@@ -110,10 +119,6 @@ public class MainActivity extends BaseAppCompatActivity{
         // Clipboard copy
         clipboardManager = (ClipboardManager) getSystemService(Context.CLIPBOARD_SERVICE);
 
-        // Link shortening (Bitly)
-        Bitly.initialize(this, ACCESS_TOKEN);
-        linkShortener2 = new LinkShortener();
-
         // Setting custom Toolbar or Action bar as default Actionbar
         setupActionBar();
         ActionBar actionBar = getSupportActionBar();
@@ -121,15 +126,37 @@ public class MainActivity extends BaseAppCompatActivity{
         headerImageView.setVisibility(View.VISIBLE);
 
 
+
+        // Shared Preferences
+        appPreferences =  getApplicationContext().getSharedPreferences(AppContract.PREFS_APP_SETTINGS, MODE_PRIVATE);
+        preferenceChangeListener = new SharedPreferences.OnSharedPreferenceChangeListener() {
+            @Override
+            public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
+                switch(key){
+                    case AppContract.PREF_AUTO_SHORTEN:
+                        boolean autoShortenPreference =  appPreferences.getBoolean(AppContract.PREF_AUTO_SHORTEN, false);
+                        linkShortenCheckbox.setChecked(autoShortenPreference);
+                        break;
+                }
+            }
+        };
+        appPreferences.registerOnSharedPreferenceChangeListener(preferenceChangeListener);
+
+        // Link shortening (Bitly)
+        ACCESS_TOKEN = appPreferences.getString(AppContract.PREF_BITLY_TOKEN, null);
+        if(ACCESS_TOKEN != null) {
+            Bitly.initialize(this, ACCESS_TOKEN);
+        }
+
+        linkShortener = new LinkShortener();
+        // Auto shorten switch
+        isAutoShortenEnabled =  appPreferences.getBoolean(AppContract.PREF_AUTO_SHORTEN, false);
+        linkShortenCheckbox.setChecked(isAutoShortenEnabled);
+
         // Setting up Navigation Drawer
         setupNavDrawer();
 
-        //Browser launch
-        Uri data = this.getIntent().getData();
-        if (data != null && data.isHierarchical()) {
-            String uri = this.getIntent().getDataString();
-            Log.i("MyApp", "Deep link clicked " + uri);
-        }
+
         // Getting Affiliate Id selection
         idSelector.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
@@ -188,7 +215,12 @@ public class MainActivity extends BaseAppCompatActivity{
             }
         });
 
+
+
     }
+
+    /* ONCREATE() ENDS HERE*/
+
     @Override
     public boolean onOptionsItemSelected(MenuItem item){
         switch (item.getItemId()){
@@ -199,7 +231,9 @@ public class MainActivity extends BaseAppCompatActivity{
         return super.onOptionsItemSelected(item);
     }
 
-    public class ScrapingTask extends AsyncTask<String, Void, String> {
+
+    // Fetches Product title in Background if Title is empty
+    public class TitleFetcherTask extends AsyncTask<String, Void, String> {
         // Parameters
         String entryUriString = "";
         String linkUrl = "";
@@ -219,6 +253,11 @@ public class MainActivity extends BaseAppCompatActivity{
             siteCode = Integer.valueOf(strings[2]);
             Document doc;
 
+            // Checking if it an App Deep link (Ex: https://gearbest.app.link/nsjdjsjd)
+            boolean isAppLink;
+            String appLinkPattern = "^(https:\\/\\/|http:\\/\\/)?((([bB]anggood)|[gG]earbest)[.])(app[.]link)(\\/).{0,}?$";
+            isAppLink = Pattern.matches(appLinkPattern, linkUrl);
+
             // Choosing the HTML DOM selector based on Website
             switch (siteCode){
                 case AppContract.AMAZON_TYPE_CODE:
@@ -230,9 +269,32 @@ public class MainActivity extends BaseAppCompatActivity{
                 case AppContract.GEARBEST_TYPE_CODE:
                     htmlSelector = "h1.goodsIntro_title";
                     break;
+                case AppContract.BANGGOOD_TYPE_CODE:
+                    if(isAppLink){
+                       htmlSelector = "div.product_title";
+                    }
+                    else htmlSelector = "strong.title_strong";
+                    break;
+                default:
+                    Log.d("DOM SELECTOR", "Invalid site type");
             }
             try {
-                doc = Jsoup.connect(linkUrl).userAgent("Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/48.0.2564.116 Safari/537.36").get();
+                String mUserAgents;
+                if(isAppLink){
+                    mUserAgents = "Mozilla/5.0 (iPhone; CPU iPhone OS 9_1 like Mac OS X) AppleWebKit/601.1.46 (KHTML, like Gecko) Version/9.0 Mobile/13B143 Safari/601.1";
+                }
+                else {
+                    mUserAgents = "Mozilla/65.0.1 (Windows NT 6.1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/70.0.3538.102 Safari/537.36";
+                }
+                doc = Jsoup
+                        .connect(linkUrl)
+                        .timeout(10 * 1000)
+                        .userAgent(mUserAgents)
+                        .referrer("http://www.google.com")
+                        .followRedirects(false)
+                        .get();
+                Log.i("JSOUP", "jsoup_title" + doc.title());
+                Log.i("JSOUP", "jsoup" + doc.toString());
                 Element productTitle = doc.select(htmlSelector).first();
                 if(productTitle != null) {
                     title = productTitle.text();
@@ -243,6 +305,8 @@ public class MainActivity extends BaseAppCompatActivity{
             }
             catch (IOException IOe){
                 IOe.printStackTrace();
+                Log.i("JSOUP_ERROR", "jsoup" + IOe);
+
             }
 
             return title;
@@ -289,7 +353,7 @@ public class MainActivity extends BaseAppCompatActivity{
 
                 // Shortening the Link
                 if (linkShortenCheckbox.isChecked()){
-                    linkShortener2.shorten(txt_outputUrl);
+                    linkShortener.shorten(txt_outputUrl);
                 }
 
                 return 0;
@@ -376,7 +440,7 @@ public class MainActivity extends BaseAppCompatActivity{
 
         // If Product Title is Empty, fetch it and update it on Database
         if(title.isEmpty() || title.equals("No Title")){
-            ScrapingTask getTitle = new ScrapingTask();
+            TitleFetcherTask getTitle = new TitleFetcherTask();
             getTitle.execute(url, newLinkUri.toString(), Integer.toString(GeneratorMode));
 //            ContentValues updateTitleValues = new ContentValues();
 //            updateTitleValues.put(linksEntry.COLUMN_TITLE, "New title");
@@ -394,6 +458,8 @@ public class MainActivity extends BaseAppCompatActivity{
         // Setting custom Toolbar or Action bar as default Actionbar
         getSupportActionBar().setHomeAsUpIndicator(R.drawable.ic_menu_black_24dp);
     }
+
+    // Navigation Drawer
     protected void setupNavDrawer(){
         // Setting up Navigation Drawer
         myDrawerLayout = (DrawerLayout) findViewById(R.id.myDrawerLayout);
@@ -416,7 +482,7 @@ public class MainActivity extends BaseAppCompatActivity{
                         startActivity(setupIntent);
                         break;
                     case R.id.nav_about:
-                        Intent bitlyIntent = new Intent(getApplicationContext(), BitlyShorten.class);
+                        Intent bitlyIntent = new Intent(getApplicationContext(), AboutApp.class);
                         startActivity(bitlyIntent);
                         break;
                 }
@@ -470,29 +536,33 @@ public class MainActivity extends BaseAppCompatActivity{
     }
 
     public class LinkShortener {
-        String shortLink = "";
-        public static final String LOG_TAG = "BitlyShorten.class";
+        String shortLink = null;
+        String accessToken = appPreferences.getString(AppContract.PREF_BITLY_TOKEN, null);
 
         public String shorten(String longLink){
-            Bitly.Callback bitlyCallback = new Bitly.Callback() {
-                @Override
-                public void onResponse(Response response) {
-                    shortLink = response.getBitlink();
-                    Log.d("RESPONSE", "onResponse: " + shortLink);
-                    if (shortLink != null) {
-                        generatedUrl.setText(shortLink);
+            if (accessToken != null) {
+                Bitly.Callback bitlyCallback = new Bitly.Callback() {
+                    @Override
+                    public void onResponse(Response response) {
+                        shortLink = response.getBitlink();
+                        Log.d("RESPONSE", "onResponse: " + shortLink);
+                        if (shortLink != null) {
+                            generatedUrl.setText(shortLink);
+                        }
+                        addToDb();
                     }
-                    addToDb();
-                }
 
-                @Override
-                public void onError(Error error) {
-                    Log.d("BITLY_ERROR", "Bitlink_error: " + error.getErrorMessage());
-                    addToDb();
-                }
-            };
-            Bitly.shorten(longLink, bitlyCallback);
-
+                    @Override
+                    public void onError(Error error) {
+                        Log.d("BITLY_ERROR", "Bitlink_error: " + error.getErrorMessage());
+                        addToDb();
+                    }
+                };
+                Bitly.shorten(longLink, bitlyCallback);
+            }
+            else {
+                Toast.makeText(getApplicationContext(), "Please link your Bit.ly account or Turn-off link shortening", Toast.LENGTH_SHORT).show();
+            }
             return shortLink;
         }
     }

@@ -28,6 +28,19 @@
     <string name="about_dev">About Us</string>
 
     <!--Settings Activity-->
+    <string name="txt_HeadingLinkShortening">Link Shortening</string>
+    <string name="txt_globalShortening">Automatically Shorten All links</string>
+
+    <!--Bitly Account-->
+    <string name="txt_bitlyTokenField">Account not Linked</string>
+    <string name="txt_bitlyLink">Link your Bit.ly account</string>
+    <string name="txt_bitlyRemove">Remove account</string>
+    <string name="txt_accountAlreadyLinked">Account already linked!</string>
+    <string name="txt_successAccountLinked">Account Successfully linked.</string>
+    <string name="txt_confirmBitlyRemoveTitle">Remove Bitly account?</string>
+    <string name="txt_confirmBitlyRemove">If you Remove your Bitly account, you cannot Shorten links anymore.\nDo you want to Delete anyway?</string>
+    <string name="txt_successAccountRemoved">Account Removed Successfully!</string>
+
     <string name="txt_HeadingAffiliateIDSetup">Setup Affiliate ID/TAGs</string>
     <string name="txt_HeadingNewAffId">Add New ID</string>
     <string name="txt_HeadingExistingIds">Existing Affiliate IDs</string>
@@ -36,6 +49,7 @@
         <item>Amazon</item>
         <item>Flipkart</item>
         <item>GearBest</item>
+        <item>Banggood</item>
     </string-array>
     <!--Delete Dialog Settings-->
     <string name="txt_deleteDialogPositive">Yes</string>
@@ -43,6 +57,9 @@
     <string name="txt_deleteDialogTitle">Delete</string>
     <string name="txt_deleteDialogMessage">Are you sure you want to delete the Affiliate ID?</string>
 
+    <!--About Page-->
+    <string name="txt_aboutApp">Affo is an Easiest way to generate and manage your affiliate links for multiple affiliate networks all at one place. We currently support Amazon, Flipkart, Banggood and Gearbest.\n <b>Developer - Susheel Karam\nWebsite - susheelkaram.com</b></string>
+    <string name="txt_aboutAppShort">The All-in-One tool to Generate, Shorten and Manage your Affiliate links.</string>
     <!--Toasts/ Log Messages/ Misc. Text-->
     <string name="txt_shareIntent">Share your Generated link using: </string>
     <string name="txt_EmptyGeneratedUrl">Please Generate the link first.</string>

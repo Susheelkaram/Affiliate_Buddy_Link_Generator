@@ -27,8 +27,8 @@
     <style name="defaultButton_style" parent="android:Widget.Button">
         <item name="android:fontFamily">@font/opensans_light</item>
     </style>
-    
-    
+
+
     <style name="Style_HeadingSettings">
         <item name="android:capitalize">words</item>
         <item name="android:textSize">13sp</item>
@@ -65,5 +65,30 @@
     </style>
     <style name="MyHintStyle" parent="TextAppearance.AppCompat.Small">
         <item name="android:textColor">@color/colorBlack</item>
+    </style>
+
+    <!--About Page Styles-->
+    <style name="aboutCardViewStyle" parent="CardView.Light">
+        <item name="cardElevation">5dp</item>
+        <item name="cardCornerRadius">2dp</item>
+        <item name="android:layout_marginTop">10dp</item>
+        <item name="android:layout_marginStart">10dp</item>
+        <item name="android:layout_marginEnd">10dp</item>
+    </style>
+
+    <style name="aboutHeadingStyle">
+        <item name="android:textSize">15sp</item>
+        <item name="android:textStyle">bold</item>
+        <item name="android:paddingBottom">5dp</item>
+        <item name="android:paddingStart">10dp</item>
+    </style>
+
+    <style name="aboutItemStyle">
+        <item name="android:drawablePadding">20dp</item>
+        <item name="android:textSize">15sp</item>
+        <item name="android:padding">10dp</item>
+        <item name="android:layout_gravity">center_vertical</item>
+        <item name="android:onClick">itemOnClick</item>
+        <item name="android:clickable">true</item>
     </style>
 </resources>
