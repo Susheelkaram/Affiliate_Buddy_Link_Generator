@@ -25,8 +25,10 @@ public final class AppContract {
     public static final String PREF_BITLY_NAME = "bitlyLoginName";
     public static final String PREF_SHORTLINK_POINTS = "shortenPoints";
     public static final String PREF_IS_FIRST_STARTUP = "isFirstStartup";
+    public static final String PREF_IS_FREE_SHORTENER = "isFreeShorterInUse";
 
     // Short Link Points
+    public static final String DEV_BITLY_ACCESS_TOKEN = "c7d893ceb4a5d1f91ffa124522772cc6c7beb4c9";
     public static final int POINTS_MAX = 50;
     public static final int POINTS_INITIAL = 10;
     public static final int POINTS_REWARD = 5;

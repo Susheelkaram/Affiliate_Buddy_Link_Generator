@@ -4,13 +4,14 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="@color/colorWhite"
     android:orientation="vertical"
-    tools:context=".SettingsActivity"
-    android:background="@color/colorWhite">
+    tools:context=".SettingsActivity">
+
     <include
         layout="@layout/toolbar"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"/>
+        android:layout_height="wrap_content" />
 
     <!--<ScrollView-->
     <!--android:layout_width="match_parent"-->
@@ -19,74 +20,92 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical">
+
         <TextView
             android:id="@+id/tv_HeadinLinkShorten"
+            style="@style/Style_HeadingSettings"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="@string/txt_HeadingLinkShortening"
-            style="@style/Style_HeadingSettings"/>
+            android:text="@string/txt_HeadingLinkShortening" />
+
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
             android:paddingLeft="15dp"
             android:paddingRight="15dp">
-            <Switch
-                android:id="@+id/switch_AutoShorten"
+
+            <TableLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="@string/txt_globalShortening"
-                android:textSize="16sp"
-                android:layout_marginBottom="20dp"/>
+                android:stretchColumns="*">
+
+                <TableRow>
+
+                    <Switch
+                        android:id="@+id/switch_AutoShorten"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginBottom="20dp"
+                        android:text="@string/txt_globalShortening"
+                        android:textSize="16sp" />
+                </TableRow>
+            </TableLayout>
+
+
             <TextView
                 android:id="@+id/textView_BitlyLinkStatus"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="@string/txt_bitlyTokenField"
                 android:layout_gravity="center_horizontal"
-                android:textColor="@color/colorDarkGrey"
-                android:textSize="13sp"
-                android:textAlignment="center"
                 android:layout_marginBottom="10dp"
-                android:padding="10dp"
                 android:background="@color/colorExtraLightGrey"
-                android:fontFamily="serif-monospace"/>
-            <android.support.design.button.MaterialButton
-                style="@style/Widget.MaterialComponents.Button.Icon"
-                android:id="@+id/btn_LinkBitlyAccount"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center_horizontal"
-                android:text="@string/txt_bitlyLink"
-                app:icon="@drawable/ic_link_black_24dp"
-                android:layout_marginBottom="10dp"
-                android:backgroundTint="@color/colorBlack"/>
+                android:fontFamily="serif-monospace"
+                android:padding="10dp"
+                android:text="@string/txt_bitlyTokenField"
+                android:textAlignment="center"
+                android:textColor="@color/colorDarkGrey"
+                android:textSize="13sp" />
 
             <android.support.design.button.MaterialButton
+                android:id="@+id/btn_LinkBitlyAccount"
                 style="@style/Widget.MaterialComponents.Button.Icon"
-                android:id="@+id/btn_RemoveBitlyAccount"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center_horizontal"
-                android:text="@string/txt_bitlyRemove"
-                app:icon="@drawable/ic_delete_black_24dp"
                 android:layout_marginBottom="10dp"
-                android:visibility="gone"/>
+                android:backgroundTint="@color/colorBlack"
+                android:text="@string/txt_bitlyLink"
+                app:icon="@drawable/ic_link_black_24dp" />
+
+            <android.support.design.button.MaterialButton
+                android:id="@+id/btn_RemoveBitlyAccount"
+                style="@style/Widget.MaterialComponents.Button.Icon"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_horizontal"
+                android:layout_marginBottom="10dp"
+                android:text="@string/txt_bitlyRemove"
+                android:visibility="gone"
+                app:icon="@drawable/ic_delete_black_24dp" />
         </LinearLayout>
+
         <TextView
             android:id="@+id/tv_HeadingAffid"
+            style="@style/Style_HeadingSettings"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="@string/txt_HeadingAffiliateIDSetup"
-            style="@style/Style_HeadingSettings"/>
+            android:text="@string/txt_HeadingAffiliateIDSetup" />
+
         <ListView
             android:id="@+id/LV_SettingsAffIDListView"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:background="@color/colorWhite" />
+
         <View
             android:layout_width="match_parent"
-            android:layout_height="1dp"/>
+            android:layout_height="1dp" />
     </LinearLayout>
     <!--</ScrollView>-->
 </LinearLayout>

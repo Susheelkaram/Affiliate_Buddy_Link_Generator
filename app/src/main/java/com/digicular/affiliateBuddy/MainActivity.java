@@ -10,6 +10,7 @@ import android.net.Uri;
 import android.support.annotation.NonNull;
 import android.support.design.button.MaterialButton;
 import android.support.design.widget.NavigationView;
+import android.support.design.widget.Snackbar;
 import android.support.design.widget.TextInputLayout;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
@@ -155,8 +156,17 @@ public class MainActivity extends BaseAppCompatActivity{
 
         // Link shortening (Bitly)
         ACCESS_TOKEN = appPreferences.getString(AppContract.PREF_BITLY_TOKEN, null);
+
         if(ACCESS_TOKEN != null) {
+            // User Bit.ly account is being used
             Bitly.initialize(this, ACCESS_TOKEN);
+        }
+        else {
+            // Developer Bit.ly account is being used (with Points limit)
+            Bitly.initialize(this, AppContract.DEV_BITLY_ACCESS_TOKEN);
+            appPreferences.edit()
+                    .putBoolean(AppContract.PREF_IS_FREE_SHORTENER, true)
+                    .apply();
         }
 
         linkShortener = new LinkShortener();
@@ -414,24 +424,38 @@ public class MainActivity extends BaseAppCompatActivity{
         String accessToken = appPreferences.getString(AppContract.PREF_BITLY_TOKEN, null);
 
         public String shorten(String longLink){
-            if (accessToken != null) {
-                Bitly.Callback bitlyCallback = new Bitly.Callback() {
-                    @Override
-                    public void onResponse(Response response) {
-                        shortLink = response.getBitlink();
-                        Log.d("RESPONSE", "onResponse: " + shortLink);
-                        if (shortLink != null) {
-                            generatedUrl.setText(shortLink);
-                        }
-                        Helpers.addToDb(mContext);
-                    }
+            boolean isUsingFreeLinkPoints = appPreferences.getBoolean(AppContract.PREF_IS_FREE_SHORTENER, true);
+            int currentFreeLinkPoints = appPreferences.getInt(AppContract.PREF_SHORTLINK_POINTS, 0);
 
-                    @Override
-                    public void onError(Error error) {
-                        Log.d("BITLY_ERROR", "Bitlink_error: " + error.getErrorMessage());
-                        Helpers.addToDb(mContext);
+            Bitly.Callback bitlyCallback = new Bitly.Callback() {
+                @Override
+                public void onResponse(Response response) {
+                    shortLink = response.getBitlink();
+                    Log.d("RESPONSE", "onResponse: " + shortLink);
+                    if (shortLink != null) {
+                        generatedUrl.setText(shortLink);
                     }
-                };
+                    Helpers.addToDb(mContext);
+                }
+
+                @Override
+                public void onError(Error error) {
+                    Log.d("BITLY_ERROR", "Bitlink_error: " + error.getErrorMessage());
+                    Helpers.addToDb(mContext);
+                }
+            };
+
+            if(isUsingFreeLinkPoints && currentFreeLinkPoints > 0){
+                Bitly.shorten(longLink, bitlyCallback);
+                appPreferences.edit()
+                        .putInt(AppContract.PREF_SHORTLINK_POINTS, --currentFreeLinkPoints)
+                        .apply();
+            }
+            else if(isUsingFreeLinkPoints && currentFreeLinkPoints <= 0){
+                Toast.makeText(getApplicationContext(),
+                        "No Free Points. Add more points by pressing \"+\" button in the Menu to Shorten links or Link your Bitly account", Toast.LENGTH_SHORT).show();
+            }
+            else if(accessToken != null) {
                 Bitly.shorten(longLink, bitlyCallback);
             }
             else {
