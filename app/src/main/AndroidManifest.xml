@@ -11,7 +11,14 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-        <activity android:name=".staticActivities.HowToUse"></activity>
+        <!-- Admob -->
+        <meta-data
+            android:name="com.google.android.gms.ads.APPLICATION_ID"
+            android:value="ca-app-pub-4360913501115508~9340035645"/>
+
+        <activity android:name=".staticActivities.HowToUse"
+            android:label="How to Use">
+        </activity>
         <activity
             android:name=".staticActivities.AboutApp"
             android:label="About App and Developer" />

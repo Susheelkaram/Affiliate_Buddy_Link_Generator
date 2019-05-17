@@ -60,6 +60,8 @@
     <!--About Page-->
     <string name="txt_aboutApp">Affo is an Easiest way to generate and manage your affiliate links for multiple affiliate networks all at one place. We currently support Amazon, Flipkart, Banggood and Gearbest.\n <b>Developer - Susheel Karam\nWebsite - susheelkaram.com</b></string>
     <string name="txt_aboutAppShort">The All-in-One tool to Generate, Shorten and Manage your Affiliate links.</string>
+    <string name="txt_ShareApp">Hey, try this Unique and All-in-One Affiate Link generator/ manager for all your Affiliate programs.</string>
+
     <!--Toasts/ Log Messages/ Misc. Text-->
     <string name="txt_shareIntent">Share your Generated link using: </string>
     <string name="txt_EmptyGeneratedUrl">Please Generate the link first.</string>

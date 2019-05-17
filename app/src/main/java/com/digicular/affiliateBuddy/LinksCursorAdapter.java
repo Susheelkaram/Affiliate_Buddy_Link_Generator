@@ -1,6 +1,9 @@
 package com.digicular.affiliateBuddy;
 import com.digicular.affiliateBuddy.data.linksContract;
+import com.digicular.affiliateBuddy.utils.Helpers;
 
+import android.animation.Animator;
+import android.animation.AnimatorInflater;
 import android.content.ClipData;
 import android.content.ClipboardManager;
 import android.content.ContentResolver;
@@ -16,6 +19,9 @@ import android.widget.CursorAdapter;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import java.util.Timer;
+import java.util.TimerTask;
+
 public class LinksCursorAdapter extends CursorAdapter{
     Context mContext;
 
@@ -30,7 +36,8 @@ public class LinksCursorAdapter extends CursorAdapter{
     }
 
     @Override
-    public void bindView(View view, final Context context, Cursor cursor) {
+    public void bindView(final View view, final Context context, Cursor cursor) {
+
         // Getting textviews for individual Link item
         TextView hSite = (TextView) view.findViewById(R.id.textView_hSite);
         TextView hTitle = (TextView) view.findViewById(R.id.textView_hTitle);
@@ -39,7 +46,6 @@ public class LinksCursorAdapter extends CursorAdapter{
         Button hDeleteButton = (Button) view.findViewById(R.id.button_hDelete);
         Button hShareButton = (Button) view.findViewById(R.id.button_hShare);
 
-
         // Getting title and url in current row
         String site = cursor.getString(cursor.getColumnIndexOrThrow(linksContract.linksEntry.COLUMN_PROGRAM));
         String title = cursor.getString(cursor.getColumnIndexOrThrow(linksContract.linksEntry.COLUMN_TITLE));
@@ -47,11 +53,12 @@ public class LinksCursorAdapter extends CursorAdapter{
         int id = cursor.getInt(cursor.getColumnIndexOrThrow(linksContract.linksEntry.COLUMN_ID));
         final Uri currentEntryUri =  Uri.withAppendedPath(linksContract.linksEntry.CONTENT_URI, Integer.toString(id));
 
-
         // Setting values to Textviews
         hSite.setText(site);
         hTitle.setText(title);
         hUrl.setText(url);
+
+        // Copy Button
         hCopyButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -61,6 +68,8 @@ public class LinksCursorAdapter extends CursorAdapter{
                 Toast.makeText(context, "Link Copied to clipboard", Toast.LENGTH_SHORT).show();
             }
         });
+
+        // Delete Button
         hDeleteButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -74,27 +83,15 @@ public class LinksCursorAdapter extends CursorAdapter{
                 }
             }
         });
+
+        // Share Button
         hShareButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                MainActivity mainActivity = new MainActivity();
-                mainActivity.shareNowMain(mContext,url);
+                Helpers.shareNow(mContext, url);
             }
         });
     }
-//    // Share Action Method
-//    public void shareNowMain(String shareText){
-//        if(!shareText.isEmpty()){
-//            Intent shareIntent = new Intent(Intent.ACTION_SEND);
-//            shareIntent.putExtra(Intent.EXTRA_TEXT, shareText);
-//            shareIntent.setType("text/plain");
-//            mContext.startActivity(Intent.createChooser(shareIntent, "Share your Generated link using: "));
-//        }
-//        else {
-//            Toast.makeText(mContext, "Please, generate the link first.", Toast.LENGTH_SHORT).show();
-//            return;
-//        }
-//    }
 
 
 

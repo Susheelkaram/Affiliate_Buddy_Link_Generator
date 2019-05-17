@@ -1,6 +1,5 @@
 package com.digicular.affiliateBuddy;
 
-import android.content.ClipData;
 import android.content.ClipboardManager;
 import android.content.ContentValues;
 import android.content.Context;
@@ -8,8 +7,6 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.net.Uri;
-import android.net.sip.SipSession;
-import android.os.AsyncTask;
 import android.support.annotation.NonNull;
 import android.support.design.button.MaterialButton;
 import android.support.design.widget.NavigationView;
@@ -31,15 +28,8 @@ import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.SimpleCursorAdapter;
 import android.widget.Spinner;
-import android.widget.Switch;
 import android.widget.TextView;
 import android.widget.Toast;
-
-import org.jsoup.Jsoup;
-import org.jsoup.nodes.Document;
-import org.jsoup.nodes.Element;
-
-import java.io.IOException;
 
 import com.bitly.Bitly;
 import com.bitly.Error;
@@ -47,18 +37,27 @@ import com.bitly.Response;
 import com.digicular.affiliateBuddy.data.AppContract;
 
 import com.digicular.affiliateBuddy.staticActivities.AboutApp;
+import com.digicular.affiliateBuddy.staticActivities.HowToUse;
+import com.digicular.affiliateBuddy.utils.InitialSetup;
 import com.digicular.affiliateBuddy.utils.SiteDetector;
 import com.digicular.affiliateBuddy.data.linksContract.linksEntry;
+import com.digicular.affiliateBuddy.utils.TitleFetcher;
+import com.digicular.affiliateBuddy.utils.Helpers;
+import com.google.android.gms.ads.AdRequest;
+import com.google.android.gms.ads.AdView;
+import com.google.android.gms.ads.InterstitialAd;
+import com.google.android.gms.ads.MobileAds;
 
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
-import java.util.regex.Pattern;
+import java.util.HashMap;
+import java.util.Map;
 /*
-* @author Susheel Karam
-* Website - SusheelKaram.com
-* */
+ * @author Susheel Karam
+ * Website - SusheelKaram.com
+ * */
 
 public class MainActivity extends BaseAppCompatActivity{
 
@@ -70,6 +69,7 @@ public class MainActivity extends BaseAppCompatActivity{
 
     protected static int GeneratorMode = -1;
 
+    private Context mContext = this;
     private String txt_inputUrl;
     private String selectedAssociateId;
     private String txt_outputUrl;
@@ -85,7 +85,12 @@ public class MainActivity extends BaseAppCompatActivity{
     private MaterialButton buttonGenerate;
     private EditText generatedUrl;
     private static TextView textView_productTitle;
-    private Button button_share;
+    private Button buttonShare;
+    private Button buttonCopy;
+
+    // Ads
+    private AdView bannerAd;
+    private InterstitialAd interstitialAd;
 
     private Toolbar myToolbar;
     private ImageView headerImageView;
@@ -114,7 +119,10 @@ public class MainActivity extends BaseAppCompatActivity{
         buttonGenerate = (MaterialButton) findViewById(R.id.button_generate);
         generatedUrl = (EditText) findViewById(R.id.txtInput_generatedUrl);
         textView_productTitle = (TextView) findViewById(R.id.textView_productTitle);
-        button_share = (Button) findViewById(R.id.button_share);
+        buttonShare = (Button) findViewById(R.id.button_share);
+        buttonCopy = (Button) findViewById(R.id.button_copyToClipboard);
+        myDrawerLayout = (DrawerLayout) findViewById(R.id.myDrawerLayout);
+        bannerAd = (AdView) findViewById(R.id.ad_bannerAd);
 
         // Clipboard copy
         clipboardManager = (ClipboardManager) getSystemService(Context.CLIPBOARD_SERVICE);
@@ -142,6 +150,9 @@ public class MainActivity extends BaseAppCompatActivity{
         };
         appPreferences.registerOnSharedPreferenceChangeListener(preferenceChangeListener);
 
+        // AdMob Initialization
+        MobileAds.initialize(this, "ca-app-pub-4360913501115508~9340035645");
+
         // Link shortening (Bitly)
         ACCESS_TOKEN = appPreferences.getString(AppContract.PREF_BITLY_TOKEN, null);
         if(ACCESS_TOKEN != null) {
@@ -149,13 +160,15 @@ public class MainActivity extends BaseAppCompatActivity{
         }
 
         linkShortener = new LinkShortener();
+
         // Auto shorten switch
         isAutoShortenEnabled =  appPreferences.getBoolean(AppContract.PREF_AUTO_SHORTEN, false);
         linkShortenCheckbox.setChecked(isAutoShortenEnabled);
 
         // Setting up Navigation Drawer
-        setupNavDrawer();
-
+//        Helpers.setupNavDrawer(this);
+        InitialSetup initialSetup = new InitialSetup(this);
+        initialSetup.run();
 
         // Getting Affiliate Id selection
         idSelector.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
@@ -187,20 +200,29 @@ public class MainActivity extends BaseAppCompatActivity{
         Intent inShareIntent = getIntent();
         String inShareAction = inShareIntent.getAction();
         String inSharetype =  inShareIntent.getType();
-        if(Intent.ACTION_SEND.equals(inShareAction) && inSharetype != null){
-            if("text/plain".equals(inSharetype)){
+        if(Intent.ACTION_SEND.equals(inShareAction) && inSharetype != null) {
+            if(inSharetype.equals("text/plain")) {
                 handleSendText(inShareIntent);
             }
         }
 
         // Share Out option - Sharing Generated link
-        button_share.setOnClickListener(new View.OnClickListener() {
+        buttonShare.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 String shareText = generatedUrl.getText().toString();
-                shareNowMain(MainActivity.this, shareText);
+                Helpers.shareNow(MainActivity.this, shareText);
             }
         });
+
+        buttonCopy.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                String copyText = txt_outputUrl;
+                Helpers.copyToClipboard(mContext, copyText);
+            }
+        });
+
 
         // Setting Affiliate ID from user dropdown selection
         idSelector.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
@@ -215,11 +237,16 @@ public class MainActivity extends BaseAppCompatActivity{
             }
         });
 
+        // Loading ads
+        AdRequest bannerAdRequest = new AdRequest.Builder().build();
+        bannerAd.loadAd(bannerAdRequest);
 
-
+        interstitialAd = new InterstitialAd(this);
+        interstitialAd.setAdUnitId("ca-app-pub-4360913501115508/1310336534");
+        interstitialAd.loadAd(new AdRequest.Builder().build());
     }
 
-    /* ONCREATE() ENDS HERE*/
+    /* onCreate() ENDS HERE*/
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item){
@@ -232,112 +259,18 @@ public class MainActivity extends BaseAppCompatActivity{
     }
 
 
-    // Fetches Product title in Background if Title is empty
-    public class TitleFetcherTask extends AsyncTask<String, Void, String> {
-        // Parameters
-        String entryUriString = "";
-        String linkUrl = "";
-        String htmlSelector;
-        int siteCode;
-        @Override
-        protected void onPreExecute() {
-            super.onPreExecute();
-            textView_productTitle.setText("Fetching Product Name...");
-        }
 
-        @Override
-        protected String doInBackground(String... strings) {
-            String title = "";
-            linkUrl = strings[0];
-            entryUriString = strings[1];
-            siteCode = Integer.valueOf(strings[2]);
-            Document doc;
-
-            // Checking if it an App Deep link (Ex: https://gearbest.app.link/nsjdjsjd)
-            boolean isAppLink;
-            String appLinkPattern = "^(https:\\/\\/|http:\\/\\/)?((([bB]anggood)|[gG]earbest)[.])(app[.]link)(\\/).{0,}?$";
-            isAppLink = Pattern.matches(appLinkPattern, linkUrl);
-
-            // Choosing the HTML DOM selector based on Website
-            switch (siteCode){
-                case AppContract.AMAZON_TYPE_CODE:
-                    htmlSelector = "span#productTitle";
-                    break;
-                case AppContract.FLIPKART_TYPE_CODE:
-                    htmlSelector = "span._35KyD6";
-                    break;
-                case AppContract.GEARBEST_TYPE_CODE:
-                    htmlSelector = "h1.goodsIntro_title";
-                    break;
-                case AppContract.BANGGOOD_TYPE_CODE:
-                    if(isAppLink){
-                       htmlSelector = "div.product_title";
-                    }
-                    else htmlSelector = "strong.title_strong";
-                    break;
-                default:
-                    Log.d("DOM SELECTOR", "Invalid site type");
-            }
-            try {
-                String mUserAgents;
-                if(isAppLink){
-                    mUserAgents = "Mozilla/5.0 (iPhone; CPU iPhone OS 9_1 like Mac OS X) AppleWebKit/601.1.46 (KHTML, like Gecko) Version/9.0 Mobile/13B143 Safari/601.1";
-                }
-                else {
-                    mUserAgents = "Mozilla/65.0.1 (Windows NT 6.1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/70.0.3538.102 Safari/537.36";
-                }
-                doc = Jsoup
-                        .connect(linkUrl)
-                        .timeout(10 * 1000)
-                        .userAgent(mUserAgents)
-                        .referrer("http://www.google.com")
-                        .followRedirects(false)
-                        .get();
-                Log.i("JSOUP", "jsoup_title" + doc.title());
-                Log.i("JSOUP", "jsoup" + doc.toString());
-                Element productTitle = doc.select(htmlSelector).first();
-                if(productTitle != null) {
-                    title = productTitle.text();
-                }
-                else {
-                    title = doc.title();
-                }
-            }
-            catch (IOException IOe){
-                IOe.printStackTrace();
-                Log.i("JSOUP_ERROR", "jsoup" + IOe);
-
-            }
-
-            return title;
-        }
-
-        @Override
-        protected void onPostExecute(String s) {
-            super.onPostExecute(s);
-            if(s == null || s.equals("")){
-                s = "No Product Name";
-            }
-            ContentValues updateTitleValues = new ContentValues();
-            updateTitleValues.put(linksEntry.COLUMN_TITLE, s);
-            Uri entryUri = Uri.parse(entryUriString);
-            int updatedNo = getContentResolver().update(entryUri, updateTitleValues, null, null);
-//            Toast.makeText(MainActivity.this, "No. of cells updated for Uri " + entryUri + " is " + Integer.toString(updatedNo),Toast.LENGTH_SHORT).show();
-            textView_productTitle.setText(s);
-        }
-
-    }
 
     public void generateClick(View view){
         generatedUrl.setText("");
         int generateResponse = generateLink();
         if(generateResponse == 0) {
             if (!linkShortenCheckbox.isChecked()){
-                addToDb();
+                Helpers.addToDb(this);
             }
         }
-    }
 
+    }
 
     public int generateLink(){
         txt_inputUrl = inputUrl.getText().toString();
@@ -369,29 +302,20 @@ public class MainActivity extends BaseAppCompatActivity{
         return -1;
     }
 
-    // This method copies the Generated URL to clipboard
-    public void copyToClipboard(View view){
-        if (txt_outputUrl != null) {
-            ClipData clipDataUrl = ClipData.newPlainText(getResources().getString(R.string.txt_LabelClipboardCopy), txt_outputUrl);
-            clipboardManager.setPrimaryClip(clipDataUrl);
-            Toast.makeText(this, R.string.txt_SuccessClipboardCopy, Toast.LENGTH_SHORT).show();
-            return;
-        }
-        Toast.makeText(this, R.string.txt_EmptyGeneratedUrl, Toast.LENGTH_SHORT).show();
-    }
     protected boolean isValidUrl(String urlText){
         if(urlText.isEmpty()){
             return false;
         }
         return true;
     }
+
     protected void handleSendText(Intent intent){
         // Clearing Old information in the Views
         textView_productTitle.setText("");
         inputUrl.setText("");
         generatedUrl.setText("");
 
-        // Catching Shared text and splitting into URl and extra description (Product title)
+        // Getting Shared text and splitting into URl and extra description (i.e., Product title)
         String[] sharedText = intent.getStringExtra(Intent.EXTRA_TEXT).split("(https:\\/\\/|http:\\/\\/)") ;
         String sharedDescription = sharedText[0];
         String sharedUrl = "https://" + sharedText[1];
@@ -405,97 +329,57 @@ public class MainActivity extends BaseAppCompatActivity{
             inputUrl.setText(sharedUrl);
         }
         generateClick(null);
-
     }
 
-    public void addToDb(){
-        Date date = Calendar.getInstance().getTime();
-        DateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy (hh:mm a)");
-        String timeNow = dateFormat.format(date);
-        String programName = AppContract.getTypeString(GeneratorMode);
-        String title = textView_productTitle.getText().toString();
-        String url = generatedUrl.getText().toString();
-
-        ContentValues mValues = new ContentValues();
-        mValues.put(linksEntry.COLUMN_DATETIME, timeNow);
-        mValues.put(linksEntry.COLUMN_PROGRAM, programName);
-        mValues.put(linksEntry.COLUMN_URL, url);
-
-        if(title.isEmpty()){
-            title = "No Title";
-        }
-        // Handling Empty title i.e., Avoiding null value in Title
-        mValues.put(linksEntry.COLUMN_TITLE, title);
-
-
-        // long newLinkEntryId =  mDb.insert(linksEntry.TABLE_NAME, null, mValues);
-        Uri newLinkUri = getContentResolver().insert(linksEntry.CONTENT_URI, mValues);
-
-        if(newLinkUri == null){
-            Toast.makeText(this, "Failed! Unable to Add link to database", Toast.LENGTH_SHORT).show();
-        }
-        else {
-//            Toast.makeText(this, "Success! Link Added to Database", Toast.LENGTH_SHORT).show();
-        }
-
-        // If Product Title is Empty, fetch it and update it on Database
-        if(title.isEmpty() || title.equals("No Title")){
-            TitleFetcherTask getTitle = new TitleFetcherTask();
-            getTitle.execute(url, newLinkUri.toString(), Integer.toString(GeneratorMode));
-//            ContentValues updateTitleValues = new ContentValues();
-//            updateTitleValues.put(linksEntry.COLUMN_TITLE, "New title");
-//            int updatedNo = getContentResolver().update(newLinkUri, updateTitleValues, null, null);
-            //getContentResolver().update();
-        }
-
-    }
-    public void viewLinkHistory(View view){
-        Intent intent = new Intent(this, DisplayLinksHistory.class);
-        startActivity(intent);
-    }
 
     protected void setupActionBar(){
         // Setting custom Toolbar or Action bar as default Actionbar
         getSupportActionBar().setHomeAsUpIndicator(R.drawable.ic_menu_black_24dp);
     }
 
+
+
     // Navigation Drawer
-    protected void setupNavDrawer(){
-        // Setting up Navigation Drawer
-        myDrawerLayout = (DrawerLayout) findViewById(R.id.myDrawerLayout);
-        myNavigationView = (NavigationView) findViewById(R.id.myNavigationView);
-        myNavigationView.setNavigationItemSelectedListener(new NavigationView.OnNavigationItemSelectedListener() {
-            @Override
-            public boolean onNavigationItemSelected(@NonNull MenuItem menuItem) {
-                switch (menuItem.getItemId()){
-                    case R.id.nav_home:
-                        Intent homeIntent =  new Intent(getApplicationContext(), MainActivity.class);
-                        homeIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-                        startActivity(homeIntent);
-                        break;
-                    case R.id.nav_myLinks:
-                        Intent historyIntent = new Intent(getApplicationContext(), DisplayLinksHistory.class);
-                        startActivity(historyIntent);
-                        break;
-                    case R.id.nav_settings:
-                        Intent setupIntent = new Intent(getApplicationContext(), SettingsActivity.class);
-                        startActivity(setupIntent);
-                        break;
-                    case R.id.nav_about:
-                        Intent bitlyIntent = new Intent(getApplicationContext(), AboutApp.class);
-                        startActivity(bitlyIntent);
-                        break;
-                }
-                menuItem.setChecked(true);
-                myDrawerLayout.closeDrawers();
-                return true;
-            }
-        });
-    }
+//    protected void setupNavDrawer(){
+//        // Setting up Navigation Drawer
+//        myDrawerLayout = (DrawerLayout) findViewById(R.id.myDrawerLayout);
+//        myNavigationView = (NavigationView) findViewById(R.id.myNavigationView);
+//        myNavigationView.setNavigationItemSelectedListener(new NavigationView.OnNavigationItemSelectedListener() {
+//            @Override
+//            public boolean onNavigationItemSelected(@NonNull MenuItem menuItem) {
+//                switch (menuItem.getItemId()){
+//                    case R.id.nav_home:
+//                        Intent homeIntent =  new Intent(getApplicationContext(), MainActivity.class);
+//                        homeIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+//                        startActivity(homeIntent);
+//                        break;
+//                    case R.id.nav_myLinks:
+//                        Intent historyIntent = new Intent(getApplicationContext(), DisplayLinksHistory.class);
+//                        startActivity(historyIntent);
+//                        break;
+//                    case R.id.nav_howtoUse:
+//                        Intent howToUseIntent = new Intent(getApplicationContext(), HowToUse.class);
+//                        startActivity(howToUseIntent);
+//                        break;
+//                    case R.id.nav_settings:
+//                        Intent setupIntent = new Intent(getApplicationContext(), SettingsActivity.class);
+//                        startActivity(setupIntent);
+//                        break;
+//                    case R.id.nav_about:
+//                        Intent bitlyIntent = new Intent(getApplicationContext(), AboutApp.class);
+//                        startActivity(bitlyIntent);
+//                        break;
+//                }
+//                menuItem.setChecked(true);
+//                myDrawerLayout.closeDrawers();
+//                return true;
+//            }
+//        });
+//    }
 
     // Method to detect the Site and Set the AppMode
     // to generate Links appropriately
-    protected void setAppMode(String url){
+    public void setAppMode(String url){
         if (url != null){
             textView_AppMode = (TextView) findViewById(R.id.TextView_AppMode);
             SiteDetector siteDetector = new SiteDetector();
@@ -503,17 +387,17 @@ public class MainActivity extends BaseAppCompatActivity{
 
             // Indicating Site name in a TextView
             if(GeneratorMode != -1){
-                textView_AppMode.setText(AppContract.getTypeString(GeneratorMode));
+                textView_AppMode.setText(AppContract.getModeAsString(GeneratorMode));
             }
             else textView_AppMode.setText("Unknown");
 
             // Set Spinner data (AFF ids) to Spinner based on Mode
             idSelector = (Spinner) findViewById(R.id.affId_selector);
             String selection = linksEntry.AFFID_COLUMN_PROGRAM_NAME + "=?";
-            String[] selectionArgs = new String[] {String.valueOf(AppContract.getTypeString(GeneratorMode))};
+            String[] selectionArgs = new String[] {String.valueOf(AppContract.getModeAsString(GeneratorMode))};
             Cursor affIds = getContentResolver().query(linksEntry.AFFID_CONTENT_URI, null, selection, selectionArgs, null);
             int[] adapterRowViews = new int[]{android.R.id.text1};
-            SimpleCursorAdapter CA_affIds = new SimpleCursorAdapter(this, android.R.layout.simple_spinner_item, affIds, new String[] {linksEntry.AFFID_COLUMN_IDTAG}, adapterRowViews, 0 );
+            SimpleCursorAdapter CA_affIds = new SimpleCursorAdapter(this, android.R.layout.simple_spinner_item, affIds, new String[] {linksEntry.AFFID_COLUMN_IDTAG}, adapterRowViews, 0);
             CA_affIds.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
             idSelector.setAdapter(CA_affIds);
         }
@@ -522,19 +406,9 @@ public class MainActivity extends BaseAppCompatActivity{
         }
     }
 
-    // Share Action
-    public void shareNowMain(Context context, String shareText){
-        if(!shareText.isEmpty()){
-            Intent shareIntent = new Intent(Intent.ACTION_SEND);
-            shareIntent.putExtra(Intent.EXTRA_TEXT, shareText);
-            shareIntent.setType("text/plain");
-            context.startActivity(Intent.createChooser(shareIntent, "Share your Generated link using: "));
-        }
-        else {
-            Toast.makeText(this, R.string.txt_EmptyGeneratedUrl, Toast.LENGTH_SHORT).show();
-        }
-    }
 
+
+    // Link Shortener using Bitly
     public class LinkShortener {
         String shortLink = null;
         String accessToken = appPreferences.getString(AppContract.PREF_BITLY_TOKEN, null);
@@ -549,13 +423,13 @@ public class MainActivity extends BaseAppCompatActivity{
                         if (shortLink != null) {
                             generatedUrl.setText(shortLink);
                         }
-                        addToDb();
+                        Helpers.addToDb(mContext);
                     }
 
                     @Override
                     public void onError(Error error) {
                         Log.d("BITLY_ERROR", "Bitlink_error: " + error.getErrorMessage());
-                        addToDb();
+                        Helpers.addToDb(mContext);
                     }
                 };
                 Bitly.shorten(longLink, bitlyCallback);
@@ -566,4 +440,184 @@ public class MainActivity extends BaseAppCompatActivity{
             return shortLink;
         }
     }
+
+
+
+
+
+
+
+
+
+    // XXXXXXXXXXXXXXXXXXXXXXXXX Trash Code under this which should be deleted
+    // But couldn't because of fear of crashing :( XXXXXXXXXXXXXXXXXXXXXXXXX
+
+
+
+
+
+
+
+
+    //    // Share Action
+//    public void shareNowMain(Context context, String shareText){
+//        if(!shareText.isEmpty()){
+//            Intent shareIntent = new Intent(Intent.ACTION_SEND);
+//            shareIntent.putExtra(Intent.EXTRA_TEXT, shareText);
+//            shareIntent.setType("text/plain");
+//            context.startActivity(Intent.createChooser(shareIntent, "Share your Generated link using: "));
+//        }
+//        else {
+//            Toast.makeText(this, R.string.txt_EmptyGeneratedUrl, Toast.LENGTH_SHORT).show();
+//        }
+//    }
+
+
+//  // This method copies the Generated URL to clipboard
+//    public void copyToClipboard(View view){
+//        if (txt_outputUrl != null) {
+//            ClipData clipDataUrl = ClipData.newPlainText(getResources().getString(R.string.txt_LabelClipboardCopy), txt_outputUrl);
+//            clipboardManager.setPrimaryClip(clipDataUrl);
+//            Toast.makeText(this, R.string.txt_SuccessClipboardCopy, Toast.LENGTH_SHORT).show();
+//            return;
+//        }
+//        Toast.makeText(this, R.string.txt_EmptyGeneratedUrl, Toast.LENGTH_SHORT).show();
+//    }
+
+    //    // Fetches Product title in Background if Title is empty
+//    public class TitleFetcherTask extends AsyncTask<String, Void, String> {
+//        // Parameters
+//        String entryUriString = "";
+//        String linkUrl = "";
+//        String htmlSelector;
+//        int siteCode;
+//        @Override
+//        protected void onPreExecute() {
+//            super.onPreExecute();
+//            textView_productTitle.setText("Fetching Product Name...");
+//        }
+//
+//        @Override
+//        protected String doInBackground(String... strings) {
+//            String title = "";
+//            linkUrl = strings[0];
+//            entryUriString = strings[1];
+//            siteCode = Integer.valueOf(strings[2]);
+//            Document doc;
+//
+//            // Checking if it an App Deep link (Ex: https://gearbest.app.link/nsjdjsjd)
+//            boolean isAppLink;
+//            String appLinkPattern = "^(https:\\/\\/|http:\\/\\/)?((([bB]anggood)|[gG]earbest)[.])(app[.]link)(\\/).{0,}?$";
+//            isAppLink = Pattern.matches(appLinkPattern, linkUrl);
+//
+//            // Choosing the HTML DOM selector based on Website
+//            switch (siteCode){
+//                case AppContract.AMAZON_TYPE_CODE:
+//                    htmlSelector = "span#productTitle";
+//                    break;
+//                case AppContract.FLIPKART_TYPE_CODE:
+//                    htmlSelector = "span._35KyD6";
+//                    break;
+//                case AppContract.GEARBEST_TYPE_CODE:
+//                    htmlSelector = "h1.goodsIntro_title";
+//                    break;
+//                case AppContract.BANGGOOD_TYPE_CODE:
+//                    if(isAppLink){
+//                        htmlSelector = "div.product_title";
+//                    }
+//                    else htmlSelector = "strong.title_strong";
+//                    break;
+//                default:
+//                    Log.d("DOM SELECTOR", "Invalid site type");
+//            }
+//            try {
+//                String mUserAgents;
+//                if(isAppLink){
+//                    mUserAgents = "Mozilla/5.0 (iPhone; CPU iPhone OS 9_1 like Mac OS X) AppleWebKit/601.1.46 (KHTML, like Gecko) Version/9.0 Mobile/13B143 Safari/601.1";
+//                }
+//                else {
+//                    mUserAgents = "Mozilla/65.0.1 (Windows NT 6.1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/70.0.3538.102 Safari/537.36";
+//                }
+//                doc = Jsoup
+//                        .connect(linkUrl)
+//                        .timeout(10 * 1000)
+//                        .userAgent(mUserAgents)
+//                        .referrer("http://www.google.com")
+//                        .followRedirects(false)
+//                        .get();
+//                Log.i("JSOUP", "jsoup_title" + doc.title());
+//                Log.i("JSOUP", "jsoup" + doc.toString());
+//                Element productTitle = doc.select(htmlSelector).first();
+//                if(productTitle != null) {
+//                    title = productTitle.text();
+//                }
+//                else {
+//                    title = doc.title();
+//                }
+//            }
+//            catch (IOException IOe){
+//                IOe.printStackTrace();
+//                Log.i("JSOUP_ERROR", "jsoup" + IOe);
+//
+//            }
+//
+//            return title;
+//        }
+//
+//        @Override
+//        protected void onPostExecute(String s) {
+//            super.onPostExecute(s);
+//            if(s == null || s.equals("")){
+//                s = "No Product Name";
+//            }
+//            ContentValues updateTitleValues = new ContentValues();
+//            updateTitleValues.put(linksEntry.COLUMN_TITLE, s);
+//            Uri entryUri = Uri.parse(entryUriString);
+//            int updatedNo = getContentResolver().update(entryUri, updateTitleValues, null, null);
+////            Toast.makeText(MainActivity.this, "No. of cells updated for Uri " + entryUri + " is " + Integer.toString(updatedNo),Toast.LENGTH_SHORT).show();
+//            textView_productTitle.setText(s);
+//        }
+//
+//    }
+
+
+    //    public void addToDb(){
+//        Date date = Calendar.getInstance().getTime();
+//        DateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy (hh:mm a)");
+//        String timeNow = dateFormat.format(date);
+//        String programName = AppContract.getModeAsString(GeneratorMode);
+//        String title = textView_productTitle.getText().toString();
+//        String url = generatedUrl.getText().toString();
+//
+//        ContentValues mValues = new ContentValues();
+//        mValues.put(linksEntry.COLUMN_DATETIME, timeNow);
+//        mValues.put(linksEntry.COLUMN_PROGRAM, programName);
+//        mValues.put(linksEntry.COLUMN_URL, url);
+//
+//        if(title.isEmpty()){
+//            title = "No Title";
+//        }
+//        // Handling Empty title i.e., Avoiding null value in Title
+//        mValues.put(linksEntry.COLUMN_TITLE, title);
+//
+//
+//        // long newLinkEntryId =  mDb.insert(linksEntry.TABLE_NAME, null, mValues);
+//        Uri newLinkUri = getContentResolver().insert(linksEntry.CONTENT_URI, mValues);
+//
+//        if(newLinkUri == null){
+//            Toast.makeText(this, "Failed! Unable to Add link to database", Toast.LENGTH_SHORT).show();
+//        }
+//        else {
+////            Toast.makeText(this, "Success! Link Added to Database", Toast.LENGTH_SHORT).show();
+//        }
+//
+//        // If Product Title is Empty, fetch it and update it on Database
+//        if(title.isEmpty() || title.equals("No Title")){
+//            TitleFetcher getTitle = new TitleFetcher(this);
+//            getTitle.execute(url, newLinkUri.toString(), Integer.toString(GeneratorMode));
+//        }
+//
+//    }
+
+
 }

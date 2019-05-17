@@ -136,19 +136,21 @@
                     android:padding="10dp">
 
 
-                        <EditText
-                            android:id="@+id/txtInput_generatedUrl"
-                            android:layout_width="0dp"
-                            android:layout_height="wrap_content"
-                            android:background="@drawable/textfield_rectangle"
-                            android:layout_weight="1"
-                            android:inputType="textMultiLine"
-                            android:layout_gravity="center_vertical"
-                            android:padding="10dp"
-                            android:paddingBottom="20dp"
-                            android:hint="@string/txt_hintOutputUrl"
-                            android:lines="3"
-                            android:maxLines="4"/>
+                    <EditText
+                        android:id="@+id/txtInput_generatedUrl"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:background="@drawable/textfield_rectangle"
+                        android:layout_weight="1"
+                        android:enabled="false"
+                        android:inputType="textMultiLine"
+                        android:textColor="@color/colorDarkGrey"
+                        android:layout_gravity="center_vertical"
+                        android:padding="10dp"
+                        android:paddingBottom="20dp"
+                        android:hint="@string/txt_hintOutputUrl"
+                        android:lines="3"
+                        android:maxLines="4"/>
 
 
                     <LinearLayout
@@ -166,7 +168,6 @@
                             android:layout_weight="1"
                             android:layout_marginBottom="-5dp"
                             android:layout_marginTop="-6dp"
-                            android:onClick="copyToClipboard"
                             android:paddingStart="8dp"
                             android:paddingEnd="4dp"
                             android:paddingTop="18dp"
@@ -197,8 +198,18 @@
                 </LinearLayout>
 
             </LinearLayout>
-
+            <com.google.android.gms.ads.AdView
+                xmlns:ads="http://schemas.android.com/apk/res-auto"
+                android:id="@+id/ad_bannerAd"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_alignParentBottom="true"
+                android:layout_centerHorizontal="true"
+                ads:adSize="BANNER"
+                ads:adUnitId="ca-app-pub-4360913501115508/4606583719">
+            </com.google.android.gms.ads.AdView>
         </RelativeLayout>
+
 
 
 
@@ -210,6 +221,7 @@
         android:layout_height="match_parent"
         android:layout_gravity="start"
         app:menu="@menu/drawer_view"
+        app:itemIconTint="@color/colorBlack"
         app:headerLayout="@layout/drawer_header"
         android:fitsSystemWindows="true"/>
 </android.support.v4.widget.DrawerLayout>

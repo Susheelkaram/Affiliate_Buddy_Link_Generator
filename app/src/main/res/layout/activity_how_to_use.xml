@@ -6,10 +6,16 @@
     android:layout_height="match_parent"
     tools:context=".staticActivities.HowToUse">
     <include
+        android:id="@+id/toolbar"
         layout="@layout/toolbar"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_alignParentTop="true"/>
 
-
+    <WebView
+        android:id="@+id/tutorialWebView"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_below="@id/toolbar">
+    </WebView>
 </RelativeLayout>
