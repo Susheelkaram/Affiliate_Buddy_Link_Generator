@@ -48,6 +48,7 @@ public class InitialSetup {
 
     protected void displayLinkPointsInDrawer(){
         SharedPreferences preferences = mContext.getSharedPreferences(AppContract.PREFS_APP_SETTINGS, Context.MODE_PRIVATE);
+        AdManager adManager = new AdManager(mContext);
 
         String currentPoints = Integer.toString(preferences.getInt(AppContract.PREF_SHORTLINK_POINTS, 0));
 

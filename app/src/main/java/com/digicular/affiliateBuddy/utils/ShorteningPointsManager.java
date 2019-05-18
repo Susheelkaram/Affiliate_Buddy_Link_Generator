@@ -1,9 +1,11 @@
 package com.digicular.affiliateBuddy.utils;
 
+import android.app.Activity;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
 import android.util.Log;
+import android.widget.Toast;
 
 import com.digicular.affiliateBuddy.data.AppContract;
 
@@ -15,9 +17,12 @@ import java.util.prefs.Preferences;
  */
 public class ShorteningPointsManager {
     SharedPreferences preferences;
+    Context mContext;
 
     ShorteningPointsManager(Context context){
-        preferences = context.getSharedPreferences(AppContract.PREFS_APP_SETTINGS, Context.MODE_PRIVATE);
+        mContext = context;
+        Activity activity = (Activity) context;
+        preferences = activity.getSharedPreferences(AppContract.PREFS_APP_SETTINGS, Context.MODE_PRIVATE);
     }
 
     protected void initialStart(){
@@ -37,7 +42,7 @@ public class ShorteningPointsManager {
             addRewardPointsOf(AppContract.POINTS_REWARD);
         }
         else {
-            Log.d("REWARD_POINTS", "Can't add more points, max Reward Points reached.");
+            Toast.makeText(mContext,"Can't add more points, max Reward Points reached.", Toast.LENGTH_SHORT).show();
         }
     }
 

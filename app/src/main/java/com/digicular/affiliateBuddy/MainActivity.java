@@ -39,7 +39,9 @@ import com.digicular.affiliateBuddy.data.AppContract;
 
 import com.digicular.affiliateBuddy.staticActivities.AboutApp;
 import com.digicular.affiliateBuddy.staticActivities.HowToUse;
+import com.digicular.affiliateBuddy.utils.AdManager;
 import com.digicular.affiliateBuddy.utils.InitialSetup;
+import com.digicular.affiliateBuddy.utils.ListenerManager;
 import com.digicular.affiliateBuddy.utils.SiteDetector;
 import com.digicular.affiliateBuddy.data.linksContract.linksEntry;
 import com.digicular.affiliateBuddy.utils.TitleFetcher;
@@ -48,6 +50,7 @@ import com.google.android.gms.ads.AdRequest;
 import com.google.android.gms.ads.AdView;
 import com.google.android.gms.ads.InterstitialAd;
 import com.google.android.gms.ads.MobileAds;
+import com.google.android.gms.ads.reward.RewardedVideoAd;
 
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
@@ -60,7 +63,7 @@ import java.util.Map;
  * Website - SusheelKaram.com
  * */
 
-public class MainActivity extends BaseAppCompatActivity{
+public class MainActivity extends BaseAppCompatActivity {
 
     // Site Detector Constants
     protected static final int AMAZON_IN = 100;
@@ -70,7 +73,7 @@ public class MainActivity extends BaseAppCompatActivity{
 
     protected static int GeneratorMode = -1;
 
-    private Context mContext = this;
+    private Context mContext = MainActivity.this;
     private String txt_inputUrl;
     private String selectedAssociateId;
     private String txt_outputUrl;
@@ -88,10 +91,12 @@ public class MainActivity extends BaseAppCompatActivity{
     private static TextView textView_productTitle;
     private Button buttonShare;
     private Button buttonCopy;
+    private Button btnAddMorePoints;
 
     // Ads
     private AdView bannerAd;
     private InterstitialAd interstitialAd;
+    private RewardedVideoAd linkRewardsAd;
 
     private Toolbar myToolbar;
     private ImageView headerImageView;
@@ -100,15 +105,17 @@ public class MainActivity extends BaseAppCompatActivity{
     private ClipboardManager clipboardManager;
 
     // Link Shortening
-    private static String ACCESS_TOKEN= null;
+    private static String ACCESS_TOKEN = null;
     private static LinkShortener linkShortener;
+    private static ListenerManager listenerManager;
+    private static AdManager adManager;
 
     // Shared Preferences
     SharedPreferences appPreferences;
     SharedPreferences.OnSharedPreferenceChangeListener preferenceChangeListener;
 
     @Override
-    protected void onCreate(Bundle savedInstanceState){
+    protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
@@ -123,7 +130,14 @@ public class MainActivity extends BaseAppCompatActivity{
         buttonShare = (Button) findViewById(R.id.button_share);
         buttonCopy = (Button) findViewById(R.id.button_copyToClipboard);
         myDrawerLayout = (DrawerLayout) findViewById(R.id.myDrawerLayout);
+        myNavigationView = (NavigationView) findViewById(R.id.myNavigationView);
+        btnAddMorePoints = (Button) myNavigationView.getHeaderView(0)
+                .findViewById(R.id.btn_getMore);
         bannerAd = (AdView) findViewById(R.id.ad_bannerAd);
+
+
+        listenerManager = new ListenerManager(this);
+        adManager = new AdManager(this);
 
         // Clipboard copy
         clipboardManager = (ClipboardManager) getSystemService(Context.CLIPBOARD_SERVICE);
@@ -135,15 +149,14 @@ public class MainActivity extends BaseAppCompatActivity{
         headerImageView.setVisibility(View.VISIBLE);
 
 
-
         // Shared Preferences
-        appPreferences =  getApplicationContext().getSharedPreferences(AppContract.PREFS_APP_SETTINGS, MODE_PRIVATE);
+        appPreferences = getApplicationContext().getSharedPreferences(AppContract.PREFS_APP_SETTINGS, MODE_PRIVATE);
         preferenceChangeListener = new SharedPreferences.OnSharedPreferenceChangeListener() {
             @Override
             public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
-                switch(key){
+                switch (key) {
                     case AppContract.PREF_AUTO_SHORTEN:
-                        boolean autoShortenPreference =  appPreferences.getBoolean(AppContract.PREF_AUTO_SHORTEN, false);
+                        boolean autoShortenPreference = appPreferences.getBoolean(AppContract.PREF_AUTO_SHORTEN, false);
                         linkShortenCheckbox.setChecked(autoShortenPreference);
                         break;
                 }
@@ -152,16 +165,15 @@ public class MainActivity extends BaseAppCompatActivity{
         appPreferences.registerOnSharedPreferenceChangeListener(preferenceChangeListener);
 
         // AdMob Initialization
-        MobileAds.initialize(this, "ca-app-pub-4360913501115508~9340035645");
+        adManager.initializeAdMob();
 
         // Link shortening (Bitly)
         ACCESS_TOKEN = appPreferences.getString(AppContract.PREF_BITLY_TOKEN, null);
 
-        if(ACCESS_TOKEN != null) {
+        if (ACCESS_TOKEN != null) {
             // User Bit.ly account is being used
             Bitly.initialize(this, ACCESS_TOKEN);
-        }
-        else {
+        } else {
             // Developer Bit.ly account is being used (with Points limit)
             Bitly.initialize(this, AppContract.DEV_BITLY_ACCESS_TOKEN);
             appPreferences.edit()
@@ -172,7 +184,7 @@ public class MainActivity extends BaseAppCompatActivity{
         linkShortener = new LinkShortener();
 
         // Auto shorten switch
-        isAutoShortenEnabled =  appPreferences.getBoolean(AppContract.PREF_AUTO_SHORTEN, false);
+        isAutoShortenEnabled = appPreferences.getBoolean(AppContract.PREF_AUTO_SHORTEN, false);
         linkShortenCheckbox.setChecked(isAutoShortenEnabled);
 
         // Setting up Navigation Drawer
@@ -188,13 +200,15 @@ public class MainActivity extends BaseAppCompatActivity{
             }
 
             @Override
-            public void onNothingSelected(AdapterView<?> parent) {}
+            public void onNothingSelected(AdapterView<?> parent) {
+            }
         });
 
         // Detecting change in Input URL and  Selecting Mode based on it
         inputUrl.addTextChangedListener(new TextWatcher() {
             @Override
-            public void beforeTextChanged(CharSequence s, int start, int count, int after) { }
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+            }
 
             @Override
             public void onTextChanged(CharSequence s, int start, int before, int count) {
@@ -203,15 +217,16 @@ public class MainActivity extends BaseAppCompatActivity{
             }
 
             @Override
-            public void afterTextChanged(Editable s) { }
+            public void afterTextChanged(Editable s) {
+            }
         });
 
         // Getting data (URL) from Share action from Shopping apps & Browser
         Intent inShareIntent = getIntent();
         String inShareAction = inShareIntent.getAction();
-        String inSharetype =  inShareIntent.getType();
-        if(Intent.ACTION_SEND.equals(inShareAction) && inSharetype != null) {
-            if(inSharetype.equals("text/plain")) {
+        String inSharetype = inShareIntent.getType();
+        if (Intent.ACTION_SEND.equals(inShareAction) && inSharetype != null) {
+            if (inSharetype.equals("text/plain")) {
                 handleSendText(inShareIntent);
             }
         }
@@ -251,16 +266,23 @@ public class MainActivity extends BaseAppCompatActivity{
         AdRequest bannerAdRequest = new AdRequest.Builder().build();
         bannerAd.loadAd(bannerAdRequest);
 
-        interstitialAd = new InterstitialAd(this);
-        interstitialAd.setAdUnitId("ca-app-pub-4360913501115508/1310336534");
-        interstitialAd.loadAd(new AdRequest.Builder().build());
+        adManager.loadInterstitialAd();
+
+        // Reward Video Ad
+        adManager.loadRewardAd();
+        btnAddMorePoints.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                adManager.showRewardAd();
+            }
+        });
     }
 
     /* onCreate() ENDS HERE*/
 
     @Override
-    public boolean onOptionsItemSelected(MenuItem item){
-        switch (item.getItemId()){
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
             case android.R.id.home:
                 myDrawerLayout.openDrawer(GravityCompat.START);
                 return true;
@@ -269,69 +291,65 @@ public class MainActivity extends BaseAppCompatActivity{
     }
 
 
-
-
-    public void generateClick(View view){
+    public void generateClick(View view) {
         generatedUrl.setText("");
         int generateResponse = generateLink();
-        if(generateResponse == 0) {
-            if (!linkShortenCheckbox.isChecked()){
+        if (generateResponse == 0) {
+            if (!linkShortenCheckbox.isChecked()) {
                 Helpers.addToDb(this);
             }
         }
-
+        adManager.showInterstitialAd();
     }
 
-    public int generateLink(){
+    public int generateLink() {
         txt_inputUrl = inputUrl.getText().toString();
         idSelector = (Spinner) findViewById(R.id.affId_selector);
 
-        if (GeneratorMode != -1){
+        if (GeneratorMode != -1) {
             Cursor spinnerCursor = (Cursor) idSelector.getSelectedItem();
-            if(spinnerCursor != null) {
+            if (spinnerCursor != null) {
                 selectedAffiliateId = spinnerCursor.getString(spinnerCursor.getColumnIndex(linksEntry.AFFID_COLUMN_IDTAG)).toString();
                 LinkGenerator linkGenerator = new LinkGenerator();
                 txt_outputUrl = linkGenerator.generate(txt_inputUrl, GeneratorMode, selectedAffiliateId);
                 generatedUrl.setText(txt_outputUrl);
 
                 // Shortening the Link
-                if (linkShortenCheckbox.isChecked()){
+                if (linkShortenCheckbox.isChecked()) {
                     linkShortener.shorten(txt_outputUrl);
                 }
 
                 return 0;
-            }
-            else if (spinnerCursor == null){
+            } else if (spinnerCursor == null) {
                 Toast.makeText(this, R.string.txt_EmptyAffId, Toast.LENGTH_SHORT).show();
             }
 
-        }
-        else {
+        } else {
             Toast.makeText(this, R.string.txt_InvalidUrl, Toast.LENGTH_SHORT).show();
         }
         return -1;
     }
 
-    protected boolean isValidUrl(String urlText){
-        if(urlText.isEmpty()){
+    protected boolean isValidUrl(String urlText) {
+        if (urlText.isEmpty()) {
             return false;
         }
         return true;
     }
 
-    protected void handleSendText(Intent intent){
+    protected void handleSendText(Intent intent) {
         // Clearing Old information in the Views
         textView_productTitle.setText("");
         inputUrl.setText("");
         generatedUrl.setText("");
 
         // Getting Shared text and splitting into URl and extra description (i.e., Product title)
-        String[] sharedText = intent.getStringExtra(Intent.EXTRA_TEXT).split("(https:\\/\\/|http:\\/\\/)") ;
+        String[] sharedText = intent.getStringExtra(Intent.EXTRA_TEXT).split("(https:\\/\\/|http:\\/\\/)");
         String sharedDescription = sharedText[0];
         String sharedUrl = "https://" + sharedText[1];
 
 
-        if (sharedText != null){
+        if (sharedText != null) {
             setAppMode(sharedUrl);
             textView_productTitle.setText("");
             inputUrl.setText("");
@@ -342,80 +360,38 @@ public class MainActivity extends BaseAppCompatActivity{
     }
 
 
-    protected void setupActionBar(){
+    protected void setupActionBar() {
         // Setting custom Toolbar or Action bar as default Actionbar
         getSupportActionBar().setHomeAsUpIndicator(R.drawable.ic_menu_black_24dp);
     }
 
 
-
-    // Navigation Drawer
-//    protected void setupNavDrawer(){
-//        // Setting up Navigation Drawer
-//        myDrawerLayout = (DrawerLayout) findViewById(R.id.myDrawerLayout);
-//        myNavigationView = (NavigationView) findViewById(R.id.myNavigationView);
-//        myNavigationView.setNavigationItemSelectedListener(new NavigationView.OnNavigationItemSelectedListener() {
-//            @Override
-//            public boolean onNavigationItemSelected(@NonNull MenuItem menuItem) {
-//                switch (menuItem.getItemId()){
-//                    case R.id.nav_home:
-//                        Intent homeIntent =  new Intent(getApplicationContext(), MainActivity.class);
-//                        homeIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-//                        startActivity(homeIntent);
-//                        break;
-//                    case R.id.nav_myLinks:
-//                        Intent historyIntent = new Intent(getApplicationContext(), DisplayLinksHistory.class);
-//                        startActivity(historyIntent);
-//                        break;
-//                    case R.id.nav_howtoUse:
-//                        Intent howToUseIntent = new Intent(getApplicationContext(), HowToUse.class);
-//                        startActivity(howToUseIntent);
-//                        break;
-//                    case R.id.nav_settings:
-//                        Intent setupIntent = new Intent(getApplicationContext(), SettingsActivity.class);
-//                        startActivity(setupIntent);
-//                        break;
-//                    case R.id.nav_about:
-//                        Intent bitlyIntent = new Intent(getApplicationContext(), AboutApp.class);
-//                        startActivity(bitlyIntent);
-//                        break;
-//                }
-//                menuItem.setChecked(true);
-//                myDrawerLayout.closeDrawers();
-//                return true;
-//            }
-//        });
-//    }
-
     // Method to detect the Site and Set the AppMode
     // to generate Links appropriately
-    public void setAppMode(String url){
-        if (url != null){
+    public void setAppMode(String url) {
+        if (url != null) {
             textView_AppMode = (TextView) findViewById(R.id.TextView_AppMode);
             SiteDetector siteDetector = new SiteDetector();
             GeneratorMode = siteDetector.detectSite(url);
 
             // Indicating Site name in a TextView
-            if(GeneratorMode != -1){
+            if (GeneratorMode != -1) {
                 textView_AppMode.setText(AppContract.getModeAsString(GeneratorMode));
-            }
-            else textView_AppMode.setText("Unknown");
+            } else textView_AppMode.setText("Unknown");
 
             // Set Spinner data (AFF ids) to Spinner based on Mode
             idSelector = (Spinner) findViewById(R.id.affId_selector);
             String selection = linksEntry.AFFID_COLUMN_PROGRAM_NAME + "=?";
-            String[] selectionArgs = new String[] {String.valueOf(AppContract.getModeAsString(GeneratorMode))};
+            String[] selectionArgs = new String[]{String.valueOf(AppContract.getModeAsString(GeneratorMode))};
             Cursor affIds = getContentResolver().query(linksEntry.AFFID_CONTENT_URI, null, selection, selectionArgs, null);
             int[] adapterRowViews = new int[]{android.R.id.text1};
-            SimpleCursorAdapter CA_affIds = new SimpleCursorAdapter(this, android.R.layout.simple_spinner_item, affIds, new String[] {linksEntry.AFFID_COLUMN_IDTAG}, adapterRowViews, 0);
+            SimpleCursorAdapter CA_affIds = new SimpleCursorAdapter(this, android.R.layout.simple_spinner_item, affIds, new String[]{linksEntry.AFFID_COLUMN_IDTAG}, adapterRowViews, 0);
             CA_affIds.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
             idSelector.setAdapter(CA_affIds);
-        }
-        else {
+        } else {
             Toast.makeText(getApplicationContext(), "Please Enter a Valid URL", Toast.LENGTH_SHORT).show();
         }
     }
-
 
 
     // Link Shortener using Bitly
@@ -423,7 +399,7 @@ public class MainActivity extends BaseAppCompatActivity{
         String shortLink = null;
         String accessToken = appPreferences.getString(AppContract.PREF_BITLY_TOKEN, null);
 
-        public String shorten(String longLink){
+        public String shorten(String longLink) {
             boolean isUsingFreeLinkPoints = appPreferences.getBoolean(AppContract.PREF_IS_FREE_SHORTENER, true);
             int currentFreeLinkPoints = appPreferences.getInt(AppContract.PREF_SHORTLINK_POINTS, 0);
 
@@ -445,20 +421,17 @@ public class MainActivity extends BaseAppCompatActivity{
                 }
             };
 
-            if(isUsingFreeLinkPoints && currentFreeLinkPoints > 0){
+            if (isUsingFreeLinkPoints && currentFreeLinkPoints > 0) {
                 Bitly.shorten(longLink, bitlyCallback);
                 appPreferences.edit()
                         .putInt(AppContract.PREF_SHORTLINK_POINTS, --currentFreeLinkPoints)
                         .apply();
-            }
-            else if(isUsingFreeLinkPoints && currentFreeLinkPoints <= 0){
+            } else if (isUsingFreeLinkPoints && currentFreeLinkPoints <= 0) {
                 Toast.makeText(getApplicationContext(),
                         "No Free Points. Add more points by pressing \"+\" button in the Menu to Shorten links or Link your Bitly account", Toast.LENGTH_SHORT).show();
-            }
-            else if(accessToken != null) {
+            } else if (accessToken != null) {
                 Bitly.shorten(longLink, bitlyCallback);
-            }
-            else {
+            } else {
                 Toast.makeText(getApplicationContext(), "Please link your Bit.ly account or Turn-off link shortening", Toast.LENGTH_SHORT).show();
             }
             return shortLink;
@@ -466,21 +439,8 @@ public class MainActivity extends BaseAppCompatActivity{
     }
 
 
-
-
-
-
-
-
-
     // XXXXXXXXXXXXXXXXXXXXXXXXX Trash Code under this which should be deleted
     // But couldn't because of fear of crashing :( XXXXXXXXXXXXXXXXXXXXXXXXX
-
-
-
-
-
-
 
 
     //    // Share Action
@@ -643,5 +603,43 @@ public class MainActivity extends BaseAppCompatActivity{
 //
 //    }
 
+
+    // Navigation Drawer
+//    protected void setupNavDrawer(){
+//        // Setting up Navigation Drawer
+//        myDrawerLayout = (DrawerLayout) findViewById(R.id.myDrawerLayout);
+//        myNavigationView = (NavigationView) findViewById(R.id.myNavigationView);
+//        myNavigationView.setNavigationItemSelectedListener(new NavigationView.OnNavigationItemSelectedListener() {
+//            @Override
+//            public boolean onNavigationItemSelected(@NonNull MenuItem menuItem) {
+//                switch (menuItem.getItemId()){
+//                    case R.id.nav_home:
+//                        Intent homeIntent =  new Intent(getApplicationContext(), MainActivity.class);
+//                        homeIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+//                        startActivity(homeIntent);
+//                        break;
+//                    case R.id.nav_myLinks:
+//                        Intent historyIntent = new Intent(getApplicationContext(), DisplayLinksHistory.class);
+//                        startActivity(historyIntent);
+//                        break;
+//                    case R.id.nav_howtoUse:
+//                        Intent howToUseIntent = new Intent(getApplicationContext(), HowToUse.class);
+//                        startActivity(howToUseIntent);
+//                        break;
+//                    case R.id.nav_settings:
+//                        Intent setupIntent = new Intent(getApplicationContext(), SettingsActivity.class);
+//                        startActivity(setupIntent);
+//                        break;
+//                    case R.id.nav_about:
+//                        Intent bitlyIntent = new Intent(getApplicationContext(), AboutApp.class);
+//                        startActivity(bitlyIntent);
+//                        break;
+//                }
+//                menuItem.setChecked(true);
+//                myDrawerLayout.closeDrawers();
+//                return true;
+//            }
+//        });
+//    }
 
 }
