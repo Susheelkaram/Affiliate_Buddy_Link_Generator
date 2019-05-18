@@ -134,7 +134,7 @@ public class Helpers {
 
     }
 
-    protected void setupActionBar(Context context){
+    protected static void setupActionBar(Context context){
         AppCompatActivity activity = (AppCompatActivity) context;
         // Setting custom Toolbar or Action bar as default Actionbar
         activity.getSupportActionBar().setHomeAsUpIndicator(R.drawable.ic_menu_black_24dp);

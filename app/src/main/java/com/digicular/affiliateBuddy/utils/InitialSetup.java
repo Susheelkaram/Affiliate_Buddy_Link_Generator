@@ -44,6 +44,7 @@ public class InitialSetup {
         ShorteningPointsManager shorteningPointsManager = new ShorteningPointsManager(mContext);
         shorteningPointsManager.initialStart();
         displayLinkPointsInDrawer();
+        Helpers.setupActionBar(mContext);
     }
 
     protected void displayLinkPointsInDrawer(){
@@ -58,7 +59,7 @@ public class InitialSetup {
         TextView pointsTextView = navHeader.findViewById(R.id.textView_ShortPoints);
         Button btnGetMore = navHeader.findViewById(R.id.btn_getMore);
 
-        pointsTextView.setText("Short links Left: " + currentPoints);
+        pointsTextView.setText(currentPoints);
     }
 
     // Navigation Drawer

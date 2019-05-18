@@ -48,14 +48,23 @@
             android:orientation="horizontal">
 
             <TextView
-                android:id="@+id/textView_ShortPoints"
+                android:id="@+id/textView_ShortPointsStatic"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginLeft="10dp"
                 android:layout_marginRight="10dp"
-                android:text="Short links Left: 0"
+                android:text="Short links Left:"
                 android:textColor="@color/colorBlack"
                 android:textSize="16sp" />
+
+            <TextView
+                android:id="@+id/textView_ShortPoints"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginRight="10dp"
+                android:text="0"
+                android:textColor="@color/colorBlack"
+                android:textSize="20sp" />
 
             <android.support.design.button.MaterialButton
                 android:id="@+id/btn_getMore"

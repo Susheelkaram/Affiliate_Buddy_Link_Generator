@@ -19,13 +19,13 @@ public class ShorteningPointsManager {
     SharedPreferences preferences;
     Context mContext;
 
-    ShorteningPointsManager(Context context){
+    public ShorteningPointsManager(Context context){
         mContext = context;
         Activity activity = (Activity) context;
         preferences = activity.getSharedPreferences(AppContract.PREFS_APP_SETTINGS, Context.MODE_PRIVATE);
     }
 
-    protected void initialStart(){
+    public void initialStart(){
         Boolean isFirstStart = preferences.getBoolean(AppContract.PREF_IS_FIRST_STARTUP, true);
 
         if (isFirstStart){
@@ -36,21 +36,32 @@ public class ShorteningPointsManager {
         }
     }
 
-    protected void addRewards(){
-        int currentPoints = preferences.getInt(AppContract.PREF_SHORTLINK_POINTS, 0);
+    public void addRewards(){
+        int currentPoints = getCurrentPoints();
         if (currentPoints < AppContract.POINTS_MAX) {
             addRewardPointsOf(AppContract.POINTS_REWARD);
+            Toast.makeText(mContext, "Congratulations! You won 5 Short Link points", Toast.LENGTH_SHORT).show();
         }
         else {
             Toast.makeText(mContext,"Can't add more points, max Reward Points reached.", Toast.LENGTH_SHORT).show();
         }
     }
 
-    protected void addRewardPointsOf(int points){
-        int currentPoints = preferences.getInt(AppContract.PREF_SHORTLINK_POINTS,0);
+    public void addRewardPointsOf(int points){
+        int currentPoints = getCurrentPoints();
         Editor editor = preferences.edit();
+
         int totalPoints = currentPoints + points;
+        totalPoints = (totalPoints <= AppContract.POINTS_MAX) ? totalPoints : AppContract.POINTS_MAX;
+
         editor.putInt(AppContract.PREF_SHORTLINK_POINTS,totalPoints);
         editor.apply();
+    }
+
+    public int getCurrentPoints(){
+        return preferences.getInt(AppContract.PREF_SHORTLINK_POINTS,0);
+    }
+    public boolean isMaxPointsReached(){
+        return getCurrentPoints() >= AppContract.POINTS_MAX;
     }
 }

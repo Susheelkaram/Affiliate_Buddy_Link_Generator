@@ -42,6 +42,7 @@ import com.digicular.affiliateBuddy.staticActivities.HowToUse;
 import com.digicular.affiliateBuddy.utils.AdManager;
 import com.digicular.affiliateBuddy.utils.InitialSetup;
 import com.digicular.affiliateBuddy.utils.ListenerManager;
+import com.digicular.affiliateBuddy.utils.ShorteningPointsManager;
 import com.digicular.affiliateBuddy.utils.SiteDetector;
 import com.digicular.affiliateBuddy.data.linksContract.linksEntry;
 import com.digicular.affiliateBuddy.utils.TitleFetcher;
@@ -91,6 +92,7 @@ public class MainActivity extends BaseAppCompatActivity {
     private static TextView textView_productTitle;
     private Button buttonShare;
     private Button buttonCopy;
+    private TextView tvShortLinkPointsNav;
     private Button btnAddMorePoints;
 
     // Ads
@@ -108,6 +110,7 @@ public class MainActivity extends BaseAppCompatActivity {
     private static String ACCESS_TOKEN = null;
     private static LinkShortener linkShortener;
     private static ListenerManager listenerManager;
+    private static ShorteningPointsManager shorteningPointsManager;
     private static AdManager adManager;
 
     // Shared Preferences
@@ -133,19 +136,20 @@ public class MainActivity extends BaseAppCompatActivity {
         myNavigationView = (NavigationView) findViewById(R.id.myNavigationView);
         btnAddMorePoints = (Button) myNavigationView.getHeaderView(0)
                 .findViewById(R.id.btn_getMore);
+        tvShortLinkPointsNav = (TextView) myNavigationView.getHeaderView(0)
+                .findViewById(R.id.textView_ShortPoints);
         bannerAd = (AdView) findViewById(R.id.ad_bannerAd);
 
 
         listenerManager = new ListenerManager(this);
         adManager = new AdManager(this);
+        shorteningPointsManager = new ShorteningPointsManager(mContext);
 
         // Clipboard copy
         clipboardManager = (ClipboardManager) getSystemService(Context.CLIPBOARD_SERVICE);
 
         // Setting custom Toolbar or Action bar as default Actionbar
-        setupActionBar();
-        ActionBar actionBar = getSupportActionBar();
-        actionBar.setTitle("");
+        getSupportActionBar().setTitle("");
         headerImageView.setVisibility(View.VISIBLE);
 
 
@@ -158,6 +162,10 @@ public class MainActivity extends BaseAppCompatActivity {
                     case AppContract.PREF_AUTO_SHORTEN:
                         boolean autoShortenPreference = appPreferences.getBoolean(AppContract.PREF_AUTO_SHORTEN, false);
                         linkShortenCheckbox.setChecked(autoShortenPreference);
+                        break;
+                    case AppContract.PREF_SHORTLINK_POINTS:
+                        String shortLinkPoints = Integer.toString(appPreferences.getInt(AppContract.PREF_SHORTLINK_POINTS,0));
+                        tvShortLinkPointsNav.setText(shortLinkPoints);
                         break;
                 }
             }
@@ -273,7 +281,12 @@ public class MainActivity extends BaseAppCompatActivity {
         btnAddMorePoints.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                adManager.showRewardAd();
+                if(!shorteningPointsManager.isMaxPointsReached()){
+                    adManager.showRewardAd();
+                }
+                else {
+                    Toast.makeText(mContext,"Can't add more points, max Reward Points reached.", Toast.LENGTH_SHORT).show();
+                }
             }
         });
     }
@@ -411,6 +424,8 @@ public class MainActivity extends BaseAppCompatActivity {
                     if (shortLink != null) {
                         generatedUrl.setText(shortLink);
                     }
+
+                    // Adding to Database
                     Helpers.addToDb(mContext);
                 }
 
@@ -437,209 +452,5 @@ public class MainActivity extends BaseAppCompatActivity {
             return shortLink;
         }
     }
-
-
-    // XXXXXXXXXXXXXXXXXXXXXXXXX Trash Code under this which should be deleted
-    // But couldn't because of fear of crashing :( XXXXXXXXXXXXXXXXXXXXXXXXX
-
-
-    //    // Share Action
-//    public void shareNowMain(Context context, String shareText){
-//        if(!shareText.isEmpty()){
-//            Intent shareIntent = new Intent(Intent.ACTION_SEND);
-//            shareIntent.putExtra(Intent.EXTRA_TEXT, shareText);
-//            shareIntent.setType("text/plain");
-//            context.startActivity(Intent.createChooser(shareIntent, "Share your Generated link using: "));
-//        }
-//        else {
-//            Toast.makeText(this, R.string.txt_EmptyGeneratedUrl, Toast.LENGTH_SHORT).show();
-//        }
-//    }
-
-
-//  // This method copies the Generated URL to clipboard
-//    public void copyToClipboard(View view){
-//        if (txt_outputUrl != null) {
-//            ClipData clipDataUrl = ClipData.newPlainText(getResources().getString(R.string.txt_LabelClipboardCopy), txt_outputUrl);
-//            clipboardManager.setPrimaryClip(clipDataUrl);
-//            Toast.makeText(this, R.string.txt_SuccessClipboardCopy, Toast.LENGTH_SHORT).show();
-//            return;
-//        }
-//        Toast.makeText(this, R.string.txt_EmptyGeneratedUrl, Toast.LENGTH_SHORT).show();
-//    }
-
-    //    // Fetches Product title in Background if Title is empty
-//    public class TitleFetcherTask extends AsyncTask<String, Void, String> {
-//        // Parameters
-//        String entryUriString = "";
-//        String linkUrl = "";
-//        String htmlSelector;
-//        int siteCode;
-//        @Override
-//        protected void onPreExecute() {
-//            super.onPreExecute();
-//            textView_productTitle.setText("Fetching Product Name...");
-//        }
-//
-//        @Override
-//        protected String doInBackground(String... strings) {
-//            String title = "";
-//            linkUrl = strings[0];
-//            entryUriString = strings[1];
-//            siteCode = Integer.valueOf(strings[2]);
-//            Document doc;
-//
-//            // Checking if it an App Deep link (Ex: https://gearbest.app.link/nsjdjsjd)
-//            boolean isAppLink;
-//            String appLinkPattern = "^(https:\\/\\/|http:\\/\\/)?((([bB]anggood)|[gG]earbest)[.])(app[.]link)(\\/).{0,}?$";
-//            isAppLink = Pattern.matches(appLinkPattern, linkUrl);
-//
-//            // Choosing the HTML DOM selector based on Website
-//            switch (siteCode){
-//                case AppContract.AMAZON_TYPE_CODE:
-//                    htmlSelector = "span#productTitle";
-//                    break;
-//                case AppContract.FLIPKART_TYPE_CODE:
-//                    htmlSelector = "span._35KyD6";
-//                    break;
-//                case AppContract.GEARBEST_TYPE_CODE:
-//                    htmlSelector = "h1.goodsIntro_title";
-//                    break;
-//                case AppContract.BANGGOOD_TYPE_CODE:
-//                    if(isAppLink){
-//                        htmlSelector = "div.product_title";
-//                    }
-//                    else htmlSelector = "strong.title_strong";
-//                    break;
-//                default:
-//                    Log.d("DOM SELECTOR", "Invalid site type");
-//            }
-//            try {
-//                String mUserAgents;
-//                if(isAppLink){
-//                    mUserAgents = "Mozilla/5.0 (iPhone; CPU iPhone OS 9_1 like Mac OS X) AppleWebKit/601.1.46 (KHTML, like Gecko) Version/9.0 Mobile/13B143 Safari/601.1";
-//                }
-//                else {
-//                    mUserAgents = "Mozilla/65.0.1 (Windows NT 6.1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/70.0.3538.102 Safari/537.36";
-//                }
-//                doc = Jsoup
-//                        .connect(linkUrl)
-//                        .timeout(10 * 1000)
-//                        .userAgent(mUserAgents)
-//                        .referrer("http://www.google.com")
-//                        .followRedirects(false)
-//                        .get();
-//                Log.i("JSOUP", "jsoup_title" + doc.title());
-//                Log.i("JSOUP", "jsoup" + doc.toString());
-//                Element productTitle = doc.select(htmlSelector).first();
-//                if(productTitle != null) {
-//                    title = productTitle.text();
-//                }
-//                else {
-//                    title = doc.title();
-//                }
-//            }
-//            catch (IOException IOe){
-//                IOe.printStackTrace();
-//                Log.i("JSOUP_ERROR", "jsoup" + IOe);
-//
-//            }
-//
-//            return title;
-//        }
-//
-//        @Override
-//        protected void onPostExecute(String s) {
-//            super.onPostExecute(s);
-//            if(s == null || s.equals("")){
-//                s = "No Product Name";
-//            }
-//            ContentValues updateTitleValues = new ContentValues();
-//            updateTitleValues.put(linksEntry.COLUMN_TITLE, s);
-//            Uri entryUri = Uri.parse(entryUriString);
-//            int updatedNo = getContentResolver().update(entryUri, updateTitleValues, null, null);
-////            Toast.makeText(MainActivity.this, "No. of cells updated for Uri " + entryUri + " is " + Integer.toString(updatedNo),Toast.LENGTH_SHORT).show();
-//            textView_productTitle.setText(s);
-//        }
-//
-//    }
-
-
-    //    public void addToDb(){
-//        Date date = Calendar.getInstance().getTime();
-//        DateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy (hh:mm a)");
-//        String timeNow = dateFormat.format(date);
-//        String programName = AppContract.getModeAsString(GeneratorMode);
-//        String title = textView_productTitle.getText().toString();
-//        String url = generatedUrl.getText().toString();
-//
-//        ContentValues mValues = new ContentValues();
-//        mValues.put(linksEntry.COLUMN_DATETIME, timeNow);
-//        mValues.put(linksEntry.COLUMN_PROGRAM, programName);
-//        mValues.put(linksEntry.COLUMN_URL, url);
-//
-//        if(title.isEmpty()){
-//            title = "No Title";
-//        }
-//        // Handling Empty title i.e., Avoiding null value in Title
-//        mValues.put(linksEntry.COLUMN_TITLE, title);
-//
-//
-//        // long newLinkEntryId =  mDb.insert(linksEntry.TABLE_NAME, null, mValues);
-//        Uri newLinkUri = getContentResolver().insert(linksEntry.CONTENT_URI, mValues);
-//
-//        if(newLinkUri == null){
-//            Toast.makeText(this, "Failed! Unable to Add link to database", Toast.LENGTH_SHORT).show();
-//        }
-//        else {
-////            Toast.makeText(this, "Success! Link Added to Database", Toast.LENGTH_SHORT).show();
-//        }
-//
-//        // If Product Title is Empty, fetch it and update it on Database
-//        if(title.isEmpty() || title.equals("No Title")){
-//            TitleFetcher getTitle = new TitleFetcher(this);
-//            getTitle.execute(url, newLinkUri.toString(), Integer.toString(GeneratorMode));
-//        }
-//
-//    }
-
-
-    // Navigation Drawer
-//    protected void setupNavDrawer(){
-//        // Setting up Navigation Drawer
-//        myDrawerLayout = (DrawerLayout) findViewById(R.id.myDrawerLayout);
-//        myNavigationView = (NavigationView) findViewById(R.id.myNavigationView);
-//        myNavigationView.setNavigationItemSelectedListener(new NavigationView.OnNavigationItemSelectedListener() {
-//            @Override
-//            public boolean onNavigationItemSelected(@NonNull MenuItem menuItem) {
-//                switch (menuItem.getItemId()){
-//                    case R.id.nav_home:
-//                        Intent homeIntent =  new Intent(getApplicationContext(), MainActivity.class);
-//                        homeIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-//                        startActivity(homeIntent);
-//                        break;
-//                    case R.id.nav_myLinks:
-//                        Intent historyIntent = new Intent(getApplicationContext(), DisplayLinksHistory.class);
-//                        startActivity(historyIntent);
-//                        break;
-//                    case R.id.nav_howtoUse:
-//                        Intent howToUseIntent = new Intent(getApplicationContext(), HowToUse.class);
-//                        startActivity(howToUseIntent);
-//                        break;
-//                    case R.id.nav_settings:
-//                        Intent setupIntent = new Intent(getApplicationContext(), SettingsActivity.class);
-//                        startActivity(setupIntent);
-//                        break;
-//                    case R.id.nav_about:
-//                        Intent bitlyIntent = new Intent(getApplicationContext(), AboutApp.class);
-//                        startActivity(bitlyIntent);
-//                        break;
-//                }
-//                menuItem.setChecked(true);
-//                myDrawerLayout.closeDrawers();
-//                return true;
-//            }
-//        });
-//    }
 
 }

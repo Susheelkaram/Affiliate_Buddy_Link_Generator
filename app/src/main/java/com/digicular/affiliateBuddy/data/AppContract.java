@@ -35,9 +35,9 @@ public final class AppContract {
 
     // AdMob
     public static final String ADMOB_APP_ID = "ca-app-pub-4360913501115508~9340035645";
-    public static final String ADMOB_AD_BANNER_ID = "ca-app-pub-3940256099942544/6300978111";
-    public static final String ADMOB_AD_INTERSTITIAL_ID = "ca-app-pub-3940256099942544/1033173712";
-    public static final String ADMOB_AD_REWARD_ID = "ca-app-pub-3940256099942544/5224354917";
+    public static final String ADMOB_AD_BANNER_ID = "ca-app-pub-4360913501115508/6224863621";
+    public static final String ADMOB_AD_INTERSTITIAL_ID = "ca-app-pub-4360913501115508/1310336534";
+    public static final String ADMOB_AD_REWARD_ID = "ca-app-pub-4360913501115508/3816469931";
 
 
     protected static HashMap<Integer, String> appCodeMap = new HashMap<Integer, String>()

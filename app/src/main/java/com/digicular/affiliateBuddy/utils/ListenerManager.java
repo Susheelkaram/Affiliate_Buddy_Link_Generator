@@ -45,19 +45,7 @@ public class ListenerManager {
         preferences = context.getSharedPreferences(AppContract.PREFS_APP_SETTINGS, Context.MODE_PRIVATE);
         shorteningPointsManager = new ShorteningPointsManager(mContext);
     }
-//    public TextWatcher inputTextWatcher = new TextWatcher() {
-//        @Override
-//        public void beforeTextChanged(CharSequence s, int start, int count, int after) { }
-//
-//        @Override
-//        public void onTextChanged(CharSequence s, int start, int before, int count) {
-//            String newInputUrl = editText_inputUrl.getText().toString();
-//            MainActivity.setAppMode(newInputUrl);
-//        }
-//
-//        @Override
-//        public void afterTextChanged(Editable s) { }
-//    };
+
 
     public NavigationView.OnNavigationItemSelectedListener navigationListener  = new NavigationView.OnNavigationItemSelectedListener() {
         @Override
@@ -114,7 +102,6 @@ public class ListenerManager {
         @Override
         public void onRewarded(RewardItem rewardItem) {
             shorteningPointsManager.addRewards();
-            Toast.makeText(mContext, "Congratulations! You won 5 Short link points", Toast.LENGTH_SHORT).show();
         }
 
         @Override
@@ -123,7 +110,6 @@ public class ListenerManager {
 
         @Override
         public void onRewardedVideoAdFailedToLoad(int i) {
-            Toast.makeText(mContext, "Unable to load the Ad. Check your Internet connection", Toast.LENGTH_SHORT).show();
         }
 
         @Override
