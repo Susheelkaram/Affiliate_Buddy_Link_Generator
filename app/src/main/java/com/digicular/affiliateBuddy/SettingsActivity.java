@@ -44,9 +44,12 @@ import java.lang.reflect.Array;
 public class SettingsActivity extends BaseAppCompatActivity {
     ListView LV_settingAffids;
     TextView TV_bitlyAccountStatus;
+    TextView TV_FreeLinkPoints;
     Button BTN_LinkAccount;
     Button BTN_RemoveAccount;
+    Button BTN_GetMorePointsSettings;
     Switch SW_AutoShorten;
+
 
     private static final String BITLY_AUTH_URI = "https://bitly.com/oauth/authorize?client_id=53af793b53f7b9b80b2fbda82b1decebb6bb127c&redirect_uri=affo://bitly.setup/";
 
@@ -73,8 +76,10 @@ public class SettingsActivity extends BaseAppCompatActivity {
         LV_settingAffids = (ListView) findViewById(R.id.LV_SettingsAffIDListView);
 
         TV_bitlyAccountStatus = (TextView) findViewById(R.id.textView_BitlyLinkStatus) ;
+        TV_FreeLinkPoints = (TextView) findViewById(R.id.textView_FreeLinkPoints);
         BTN_LinkAccount = (Button) findViewById(R.id.btn_LinkBitlyAccount);
         BTN_RemoveAccount = (Button) findViewById(R.id.btn_RemoveBitlyAccount);
+        BTN_GetMorePointsSettings = (Button) findViewById(R.id.btn_GetMorePointsSettings);
         SW_AutoShorten = (Switch) findViewById(R.id.switch_AutoShorten);
 
         // App Preferences
@@ -87,13 +92,14 @@ public class SettingsActivity extends BaseAppCompatActivity {
                     case AppContract.PREF_BITLY_TOKEN:
                         String currentBitlyToken = appPreferences.getString(AppContract.PREF_BITLY_TOKEN, null);
                         if(currentBitlyToken != null) {
-                            TV_bitlyAccountStatus.setText("Account Linked\n" + currentBitlyToken);
+                            TV_bitlyAccountStatus.setText(getString(R.string.txt_bitlyTokenField) + " (Linked)");
+                            TV_bitlyAccountStatus.setCompoundDrawablesWithIntrinsicBounds(0, 0, R.drawable.ic_check_circle_black_24dp,0);
                             BTN_LinkAccount.setVisibility(View.GONE);
                             BTN_RemoveAccount.setVisibility(View.VISIBLE);
                         }
                         else {
                             SW_AutoShorten.setChecked(false);
-                            TV_bitlyAccountStatus.setText("Account not linked");
+//                            TV_bitlyAccountStatus.setText("Account not linked");
                             TV_bitlyAccountStatus.setCompoundDrawablesWithIntrinsicBounds(0,0,0,0);
                         }
                         break;
@@ -101,6 +107,10 @@ public class SettingsActivity extends BaseAppCompatActivity {
             }
         };
         appPreferences.registerOnSharedPreferenceChangeListener(preferenceChangeListener);
+
+        // Displaying Free link points
+        int currentFreeLinkPoints = appPreferences.getInt(AppContract.PREF_SHORTLINK_POINTS,0);
+        TV_FreeLinkPoints.setText(Integer.toString(currentFreeLinkPoints));
 
         // Retrieving and Displaying Bitly Account linking status
         final String currentBitlyToken = appPreferences.getString(AppContract.PREF_BITLY_TOKEN, null);
@@ -113,9 +123,9 @@ public class SettingsActivity extends BaseAppCompatActivity {
             BTN_LinkAccount.setVisibility(View.GONE);
             BTN_RemoveAccount.setVisibility(View.VISIBLE);
 
-            TV_bitlyAccountStatus.setCompoundDrawablesWithIntrinsicBounds(0, 0, R.drawable.ic_check_black_24dp,0);
-            TV_bitlyAccountStatus.setText("Account Linked\n" + currentBitlyToken);
-            BTN_LinkAccount.setText("Logged in as " + currentBitlyLogin.toUpperCase());
+            TV_bitlyAccountStatus.setCompoundDrawablesWithIntrinsicBounds(0, 0, R.drawable.ic_check_circle_black_24dp,0);
+            TV_bitlyAccountStatus.setText(getString(R.string.txt_bitlyTokenField) + " (Linked)");
+//            BTN_LinkAccount.setText("Logged in as " + currentBitlyLogin.toUpperCase());
         }
         SW_AutoShorten.setChecked(autoShortenPref);
 

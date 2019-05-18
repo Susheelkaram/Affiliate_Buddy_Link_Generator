@@ -32,7 +32,7 @@
     <string name="txt_globalShortening">Automatically Shorten All links</string>
 
     <!--Bitly Account-->
-    <string name="txt_bitlyTokenField">Account not Linked</string>
+    <string name="txt_bitlyTokenField">Your Bit.ly Account</string>
     <string name="txt_bitlyLink">Link your Bit.ly account</string>
     <string name="txt_bitlyRemove">Remove account</string>
     <string name="txt_accountAlreadyLinked">Account already linked!</string>
