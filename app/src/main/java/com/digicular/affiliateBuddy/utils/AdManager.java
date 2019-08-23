@@ -20,34 +20,40 @@ public class AdManager {
 
     protected ListenerManager listenerManager;
 
-    public AdManager(Context context){
+    public AdManager(Context context) {
         mContext = context;
         listenerManager = new ListenerManager(context);
     }
 
-    public void initializeAdMob(){
+    public void initializeAdMob() {
         MobileAds.initialize(mContext, AppContract.ADMOB_APP_ID);
     }
 
-    private void loadBannerAd(){
+    private void loadBannerAd() {
 
     }
 
-    public void loadInterstitialAd(){
+    public void loadInterstitialAd() {
         interstitialAd = new InterstitialAd(mContext);
         interstitialAd.setAdUnitId(AppContract.ADMOB_AD_INTERSTITIAL_ID);
         interstitialAd.loadAd(new AdRequest.Builder().build());
     }
-    public void showInterstitialAd(){
-        if(interstitialAd.isLoaded()){
-            interstitialAd.show();
-        }
-        else {
+
+    public void showInterstitialAd() {
+        if (interstitialAd == null) {
             loadInterstitialAd();
-            interstitialAd.show();
+            return;
         }
+
+        if (interstitialAd.isLoaded()) {
+            interstitialAd.show();
+            return;
+        }
+        loadInterstitialAd();
+        interstitialAd.show();
     }
-    public void loadRewardAd(){
+
+    public void loadRewardAd() {
         linkRewardsAd = MobileAds.getRewardedVideoAdInstance(mContext);
         linkRewardsAd.setRewardedVideoAdListener(listenerManager.rewardedVideoAdListener);
         linkRewardsAd.loadAd(AppContract.ADMOB_AD_REWARD_ID,
@@ -55,12 +61,11 @@ public class AdManager {
     }
 
 
-    public void showRewardAd(){
-        if(linkRewardsAd.isLoaded()){
+    public void showRewardAd() {
+        if (linkRewardsAd.isLoaded()) {
             linkRewardsAd.show();
             loadRewardAd();
-        }
-        else {
+        } else {
             loadRewardAd();
             linkRewardsAd.show();
         }

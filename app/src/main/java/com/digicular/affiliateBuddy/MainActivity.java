@@ -144,6 +144,7 @@ public class MainActivity extends BaseAppCompatActivity {
         listenerManager = new ListenerManager(this);
         adManager = new AdManager(this);
         shorteningPointsManager = new ShorteningPointsManager(mContext);
+        linkShortener = new LinkShortener();
 
         // Clipboard copy
         clipboardManager = (ClipboardManager) getSystemService(Context.CLIPBOARD_SERVICE);
@@ -164,7 +165,7 @@ public class MainActivity extends BaseAppCompatActivity {
                         linkShortenCheckbox.setChecked(autoShortenPreference);
                         break;
                     case AppContract.PREF_SHORTLINK_POINTS:
-                        String shortLinkPoints = Integer.toString(appPreferences.getInt(AppContract.PREF_SHORTLINK_POINTS,0));
+                        String shortLinkPoints = Integer.toString(appPreferences.getInt(AppContract.PREF_SHORTLINK_POINTS, 0));
                         tvShortLinkPointsNav.setText(shortLinkPoints);
                         break;
                 }
@@ -172,12 +173,24 @@ public class MainActivity extends BaseAppCompatActivity {
         };
         appPreferences.registerOnSharedPreferenceChangeListener(preferenceChangeListener);
 
+        /****************
+         * Advertisements
+         ****************/
         // AdMob Initialization
         adManager.initializeAdMob();
 
-        // Link shortening (Bitly)
-        ACCESS_TOKEN = appPreferences.getString(AppContract.PREF_BITLY_TOKEN, null);
+        // Loading ads
+        AdRequest bannerAdRequest = new AdRequest.Builder().build();
+        bannerAd.loadAd(bannerAdRequest);
+        adManager.loadInterstitialAd();
 
+        // Reward Video Ad
+        adManager.loadRewardAd();
+
+
+
+        // Checking & Applying Link shortening Preferences
+        ACCESS_TOKEN = appPreferences.getString(AppContract.PREF_BITLY_TOKEN, null);
         if (ACCESS_TOKEN != null) {
             // User Bit.ly account is being used
             Bitly.initialize(this, ACCESS_TOKEN);
@@ -189,14 +202,11 @@ public class MainActivity extends BaseAppCompatActivity {
                     .apply();
         }
 
-        linkShortener = new LinkShortener();
-
         // Auto shorten switch
         isAutoShortenEnabled = appPreferences.getBoolean(AppContract.PREF_AUTO_SHORTEN, false);
         linkShortenCheckbox.setChecked(isAutoShortenEnabled);
 
-        // Setting up Navigation Drawer
-//        Helpers.setupNavDrawer(this);
+        // Initial stuff to be taken care of
         InitialSetup initialSetup = new InitialSetup(this);
         initialSetup.run();
 
@@ -270,29 +280,22 @@ public class MainActivity extends BaseAppCompatActivity {
             }
         });
 
-        // Loading ads
-        AdRequest bannerAdRequest = new AdRequest.Builder().build();
-        bannerAd.loadAd(bannerAdRequest);
 
-        adManager.loadInterstitialAd();
-
-        // Reward Video Ad
-        adManager.loadRewardAd();
+        // Button : Add shortening points
         btnAddMorePoints.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if(!shorteningPointsManager.isMaxPointsReached()){
+                if (!shorteningPointsManager.isMaxPointsReached()) {
                     adManager.showRewardAd();
-                }
-                else {
-                    Toast.makeText(mContext,"Can't add more points, max Reward Points reached.", Toast.LENGTH_SHORT).show();
+                } else {
+                    Toast.makeText(mContext, "Can't add more points, max Reward Points reached.", Toast.LENGTH_SHORT).show();
                 }
             }
         });
     }
 
-    /* onCreate() ENDS HERE*/
 
+    // Navigation setup
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
@@ -301,18 +304,6 @@ public class MainActivity extends BaseAppCompatActivity {
                 return true;
         }
         return super.onOptionsItemSelected(item);
-    }
-
-
-    public void generateClick(View view) {
-        generatedUrl.setText("");
-        int generateResponse = generateLink();
-        if (generateResponse == 0) {
-            if (!linkShortenCheckbox.isChecked()) {
-                Helpers.addToDb(this);
-            }
-        }
-        adManager.showInterstitialAd();
     }
 
     public int generateLink() {
@@ -343,6 +334,18 @@ public class MainActivity extends BaseAppCompatActivity {
         return -1;
     }
 
+    public void generateClick(View view) {
+        generatedUrl.setText("");
+        int generateResponse = generateLink();
+        if (generateResponse == 0) {
+            if (!linkShortenCheckbox.isChecked()) {
+                Helpers.addToDb(this);
+            }
+        }
+        adManager.showInterstitialAd();
+    }
+
+
     protected boolean isValidUrl(String urlText) {
         if (urlText.isEmpty()) {
             return false;
@@ -371,7 +374,6 @@ public class MainActivity extends BaseAppCompatActivity {
         }
         generateClick(null);
     }
-
 
     protected void setupActionBar() {
         // Setting custom Toolbar or Action bar as default Actionbar
